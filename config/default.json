@@ -1,0 +1,6 @@
+{
+    "SECRET": "turbohipster",
+    "API_URL": "http://localhost:9090/",
+    "UI_URL": "http://localhost:9292",
+    "PORT": 9191
+}

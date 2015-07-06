@@ -1,0 +1,20 @@
+{
+  "name": "xyz-nodejs",
+  "dependencies": {
+    "body-parser": "~1.12.4",
+    "config": "^1.14.0",
+    "express": "~4.12.4",
+    "morgan": "~1.5.3",
+    "q": "~1.4.1",
+    "request": "~2.57.0"
+  },
+  "repository": {},
+  "devDependencies": {
+    "jscs": "~1.13.1",
+    "jshint": "~2.8.0",
+    "expect.js": "~0.3.1",
+    "supertest": "~1.0.1",
+    "mocha": "~2.2.5",
+    "nock": "~2.5.0"
+  }
+}
