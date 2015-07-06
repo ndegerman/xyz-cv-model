@@ -43,7 +43,7 @@ app.use(errorMiddleware.errorFilter);
 
 // for debugging
 app.get('/kalle', function(req, res) {
-    res.send('Connecting to: ' + port + '. Your email is: ' + req.headers['x-forwarded-email'] + ' and your accname: ' + req.headers['x-forwarded-user']);
+    res.send('Connecting to: ' + port + '. Your email is: ' + req.headers['x-forwarded-email'] + ' and your account is: ' + req.headers['x-forwarded-user']);
 });
 
 var server = app.listen(port, function() {
