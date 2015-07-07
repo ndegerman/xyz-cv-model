@@ -17,7 +17,7 @@ module.exports = function(routes) {
     });
 
     // get profile by the userId
-    routes.get('/:userIid', function(request, response) {
+    routes.get('/:userId', function(request, response) {
         profileModel.getProfileByUserId(request.params.userId, request.headers)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
