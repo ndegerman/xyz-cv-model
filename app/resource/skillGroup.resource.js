@@ -1,33 +1,34 @@
 'use strict';
 
-var request = require('request');
+var request = require('request-promise');
 var config = require('config');
 var q = require('q');
 var responseHandler = require('../utils/response.handler');
+var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'skillGroup';
 
 exports.getSkillGroupById = function(id) {
     var options = {
+        resolveWithFullResponse: true,
         uri: url + '/' + id,
         method: 'GET',
         json: true
     };
 
-    return q.nfcall(request, options)
-        .then(responseHandler.parseResponse)
+    return request(options)
         .then(responseHandler.parseGet)
-        .then(responseHandler.parseBody);
+        .catch(errorHandler.throwDREAMSHttpError);
 };
 
 exports.getAllSkillGroups = function() {
     var options = {
+        resolveWithFullResponse: true,
         uri: url,
         method: 'GET'
     };
 
-    return q.nfcall(request, options)
-        .then(responseHandler.parseResponse)
-        .then(responseHandler.parseGet)
-        .then(responseHandler.parsePolyQuery);
+    return request(options)
+        .then(responseHandler.parseGetPolyQuery)
+        .catch(errorHandler.throwDREAMSHttpError);
 };

@@ -6,7 +6,8 @@
     "express": "~4.12.4",
     "morgan": "~1.5.3",
     "q": "~1.4.1",
-    "request": "~2.57.0"
+    "request": "~2.57.0",
+    "request-promise": "~0.4.2"
   },
   "repository": {},
   "devDependencies": {
