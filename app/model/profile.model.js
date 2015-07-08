@@ -3,10 +3,10 @@
 var userResource = require('../resource/user.resource');
 var builder = require('../builder/entity.builder');
 
-var q = require('q');
+var Promise = require('bluebird');
 
 function getProfileTemplate(user) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var profile = {
             user: user
         };
