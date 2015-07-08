@@ -8,10 +8,10 @@ var roleToAttributeResource = require('../resource/roleToAttributeConnector.reso
 var userToSkillResource = require('../resource/userToSkillConnector.resource');
 var utils = require('../utils/utils');
 
-var q = require('q');
+var Promise = require('bluebird');
 
 function getProfileTemplate(user) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var profile = {
             user: user
         };
@@ -51,7 +51,7 @@ function matchSkillsAndConnectors(connectors) {
 
 function setSkills(user) {
     return function(skills) {
-        return q.promise(function(resolve) {
+        return new Promise(function(resolve) {
             user.skills = skills;
             return resolve(user);
         });
@@ -71,7 +71,7 @@ function loadRole(headers) {
 
 function setRole(user) {
     return function(role) {
-        return q.promise(function(resolve) {
+        return new Promise(function(resolve) {
             user.role = role;
             return resolve(user);
         });
@@ -105,7 +105,7 @@ function matchAttributesAndConnectors(connectors) {
 
 function setAttributes(role) {
     return function(attributes) {
-        return q.promise(function(resolve) {
+        return new Promise(function(resolve) {
             role.attributes = attributes;
             return resolve(role);
         });

@@ -5,7 +5,6 @@
  */
 var profileModel = require('../model/profile.model');
 var responseHandler = require('../utils/response.handler');
-var q = require('q');
 
 module.exports = function(routes) {
 
