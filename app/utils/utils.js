@@ -1,9 +1,9 @@
 'use strict';
 
-var q = require('q');
+var Promise = require('bluebird');
 
 exports.extractPropertyFromConnectors = function(property, connectors) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var ids = [];
         connectors.forEach(function(connector) {
             ids.push(connector[property]);
@@ -15,7 +15,7 @@ exports.extractPropertyFromConnectors = function(property, connectors) {
 
 exports.matchListAndIds = function(list) {
     return function(ids) {
-        return q.promise(function(resolve) {
+        return new Promise(function(resolve) {
             var items = list.filter(function(item) {
                 return listContainsId(ids, item._id);
             });

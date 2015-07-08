@@ -1,6 +1,6 @@
 'use strict';
 
-var q = require('q');
+var Promise = require('bluebird');
 var errorHandler = require('./error.handler');
 var msg = require('./message.handler');
 
@@ -44,7 +44,7 @@ exports.parseGetMonoQuery = function(response) {
 };
 
 function checkResponse(response) {
-    return q.promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         if (!response) {
             return errorHandler.getHttpError(406)
                 .then(reject);
@@ -56,8 +56,7 @@ function checkResponse(response) {
 
 function checkStatusCode(code) {
     return function(response) {
-        console.log(response);
-        return q.promise(function(resolve, reject) {
+        return new Promise(function(resolve, reject) {
             if (response.statusCode === code) {
                 return resolve(response);
             }
@@ -69,14 +68,14 @@ function checkStatusCode(code) {
 }
 
 function parsePolyQuery(response) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var items = JSON.parse(response.body) || [];
         return resolve(items);
     });
 }
 
 function parseMonoQuery(response) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         parsePolyQuery(response)
             .then(function(items) {
                 var item = (items.length > 0) ? items[0] : null;
@@ -86,7 +85,7 @@ function parseMonoQuery(response) {
 }
 
 function parseBody(response) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var body = response.body || {};
         if (typeof body === 'string') {
             body = JSON.parse(body) || null;
