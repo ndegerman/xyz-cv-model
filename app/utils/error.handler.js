@@ -1,6 +1,7 @@
 'use strict';
 
 var q = require('q');
+var msg = require('./message.handler');
 
 exports.getHttpError = function(statusCode) {
     return q.promise(function(resolve) {
@@ -8,33 +9,32 @@ exports.getHttpError = function(statusCode) {
         error.status = statusCode;
         switch (statusCode) {
             case 400:
-                error.message = 'Invalid JSON object.';
+                error.message = msg.INVALID_JSON_OBJECT;
                 break;
             case 401:
-                error.message = 'Unauthorized access.';
+                error.message = msg.UNAUTHORIZED;
                 break;
             case 404:
-                error.message = 'No item with the given id was found.';
+                error.message = msg.NO_SUCH_ITEM;
                 break;
             case 406:
-                error.message = 'Invalid response format.';
+                error.message = msg.INVALID_RESPONSE;
                 break;
             case 500:
-                error.message = 'The HTTP request could not be performed.';
+                error.message = msg.FAILED_HTTP;
                 break;
             default:
-                error.message = 'Unexpected status code: ' + statusCode;
+                error.message = msg.UNEXPECTED_STATUS + statusCode;
                 break;
         }
         return resolve(error);
     });
 };
 
-// response[0]: The response
-// response[1]: The body
-exports.getDREAMSHttpError = function(response) {
-    return q.promise(function(resolve) {
-        response[1].status = response[0].statusCode;
-        return resolve(response[1]);
+exports.throwDREAMSHttpError = function(response) {
+    return q.promise(function(resolve, reject) {
+        response.message = response.message.substring(6, response.message.length);
+        response.status = response.statusCode;
+        return reject(response);
     });
 };
