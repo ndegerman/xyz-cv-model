@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 var profileRoutes = require('./routes/profile.routes')(express.Router());
+var officeRoutes = require('./routes/office.routes')(express.Router());
 
 var errorMiddleware = require('./middleware/error.middleware');
 var authenticationMiddleware = require('./middleware/authentication.middleware');
@@ -38,6 +39,7 @@ app.use(responseMiddleware.nocache);
 app.use(responseMiddleware.accessControl);
 
 app.use('/profile', profileRoutes);
+app.use('/office', officeRoutes);
 
 app.use(errorMiddleware.errorFilter);
 

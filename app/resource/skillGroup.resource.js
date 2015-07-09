@@ -7,7 +7,7 @@ var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'skillGroup';
 
-exports.getSkillGroupById = function(id) {
+exports.getSkillGroupById = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url + '/' + id,
@@ -20,11 +20,12 @@ exports.getSkillGroupById = function(id) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllSkillGroups = function() {
+exports.getAllSkillGroups = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,
-        method: 'GET'
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)

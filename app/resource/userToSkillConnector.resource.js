@@ -7,11 +7,12 @@ var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'userToSkillConnector';
 
-exports.getUserToSkillConnectorsBySkillId = function(id) {
+exports.getUserToSkillConnectorsBySkillId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '?skillId=' + id,
-        method: 'GET'
+        uri: url + '/skill/' + id,
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)
@@ -22,7 +23,7 @@ exports.getUserToSkillConnectorsBySkillId = function(id) {
 exports.getUserToSkillConnectorsByUserId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '?userId=' + id,
+        uri: url + '/user/' + id,
         method: 'GET',
         headers: headers
     };
@@ -32,11 +33,12 @@ exports.getUserToSkillConnectorsByUserId = function(id, headers) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllUserToSkillConnectors = function() {
+exports.getAllUserToSkillConnectors = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,
-        method: 'GET'
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)

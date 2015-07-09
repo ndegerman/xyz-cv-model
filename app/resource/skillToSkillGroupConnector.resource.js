@@ -7,11 +7,12 @@ var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'skillToSkillGroupConnector';
 
-exports.getSkillToSkillGroupConnectorsBySkillId = function(id) {
+exports.getSkillToSkillGroupConnectorsBySkillId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '?skillId=' + id,
-        method: 'GET'
+        uri: url + '/skill/' + id,
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)
@@ -19,11 +20,12 @@ exports.getSkillToSkillGroupConnectorsBySkillId = function(id) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getSkillToSkillGroupConnectorsBySkillGroupId = function(id) {
+exports.getSkillToSkillGroupConnectorsBySkillGroupId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '?skillGroupId=' + id,
-        method: 'GET'
+        uri: url + '/skillGroup/' + id,
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)
@@ -31,11 +33,12 @@ exports.getSkillToSkillGroupConnectorsBySkillGroupId = function(id) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllSkillToSkillGroupConnectors = function() {
+exports.getAllSkillToSkillGroupConnectors = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,
-        method: 'GET'
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)

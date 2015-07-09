@@ -34,11 +34,12 @@ exports.getCurrentUser = function(headers) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllUsers = function() {
+exports.getAllUsers = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,
-        method: 'GET'
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)
