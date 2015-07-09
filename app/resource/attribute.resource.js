@@ -7,12 +7,13 @@ var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'attribute';
 
-exports.getAttributeById = function(id) {
+exports.getAttributeById = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url + '/' + id,
         method: 'GET',
-        json: true
+        json: true,
+        headers: headers
     };
 
     return request(options)

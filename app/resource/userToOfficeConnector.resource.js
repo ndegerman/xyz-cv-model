@@ -3,14 +3,14 @@
 var request = require('request-promise');
 var config = require('config');
 var responseHandler = require('../utils/response.handler');
-
-var url = config.API_URL + 'roleToAttributeConnector';
 var errorHandler = require('../utils/error.handler');
 
-exports.getRoleToAttributeConnectorsByAttributeId = function(id, headers) {
+var url = config.API_URL + 'userToOfficeConnector';
+
+exports.getUserToOfficeConnectorsByOfficeId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/attribute/' + id,
+        uri: url + '/office/' + id,
         method: 'GET',
         headers: headers
     };
@@ -20,10 +20,10 @@ exports.getRoleToAttributeConnectorsByAttributeId = function(id, headers) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getRoleToAttributeConnectorsByRoleId = function(id, headers) {
+exports.getUserToOfficeConnectorsByUserId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/role/' + id,
+        uri: url + '/user/' + id,
         method: 'GET',
         headers: headers
     };
@@ -33,7 +33,7 @@ exports.getRoleToAttributeConnectorsByRoleId = function(id, headers) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllRoleToAttributeConnectors = function(headers) {
+exports.getAllUserToOfficeConnectors = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,

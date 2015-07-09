@@ -7,12 +7,13 @@ var errorHandler = require('../utils/error.handler');
 
 var url = config.API_URL + 'skill';
 
-exports.getSkillById = function(id) {
+exports.getSkillById = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url + '/' + id,
         method: 'GET',
-        json: true
+        json: true,
+        headers: headers
     };
 
     return request(options)

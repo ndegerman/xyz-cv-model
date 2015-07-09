@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 var msg = require('./message.handler');
 
 exports.getHttpError = function(statusCode) {
-    return q.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var error = new Error();
         error.status = statusCode;
         switch (statusCode) {

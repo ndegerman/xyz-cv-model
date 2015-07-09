@@ -10,14 +10,14 @@ module.exports = function(routes) {
 
     // get profile for current user
     routes.get('/current', function(request, response) {
-        profileModel.getCurrentProfile(request.headers)
+        profileModel.getCurrentProfileModel(request.headers)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });
 
     // get profile by the userId
     routes.get('/:userId', function(request, response) {
-        profileModel.getProfileByUserId(request.params.userId, request.headers)
+        profileModel.getProfileModelByUserId(request.params.userId, request.headers)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });

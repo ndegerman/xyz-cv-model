@@ -5,23 +5,49 @@ var builder = require('../builder/entity.builder');
 
 var Promise = require('bluebird');
 
-function getProfileTemplate(user) {
+function getProfileTemplate() {
     return new Promise(function(resolve) {
-        var profile = {
-            user: user
+        var template = {
+            user: {}
         };
-        return resolve(profile);
+        return resolve(template);
     });
 }
 
-exports.getProfileByUserId = function(id, headers) {
-    return userResource.getUserById(id, headers)
-        .then(builder.buildUserInChain(headers))
-        .then(getProfileTemplate);
+exports.getProfileModelByUserId = function(id, headers) {
+    return getProfileTemplate()
+        .then(loadUser(id, headers));
 };
 
-exports.getCurrentProfile = function(headers) {
-    return userResource.getCurrentUser(headers)
-        .then(builder.buildUserInChain(headers))
-        .then(getProfileTemplate);
+exports.getCurrentProfileModel = function(headers) {
+    return getProfileTemplate()
+        .then(loadCurrentUser(headers));
 };
+
+// USER
+// ============================================================================
+
+function loadUser(id, headers) {
+    return function(model) {
+        return userResource.getUserById(id, headers)
+            .then(builder.buildUser(headers))
+            .then(setUser(model));
+    };
+}
+
+function loadCurrentUser(headers) {
+    return function(model) {
+        return userResource.getCurrentUser(headers)
+            .then(builder.buildUser(headers))
+            .then(setUser(model));
+    };
+}
+
+function setUser(model) {
+    return function(user) {
+        return new Promise(function(resolve) {
+            model.user = user;
+            resolve(model);
+        });
+    };
+}

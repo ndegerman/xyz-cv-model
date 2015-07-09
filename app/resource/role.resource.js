@@ -34,11 +34,12 @@ exports.getRoleById = function(id, headers) {
         .catch(errorHandler.throwDREAMSHttpError);
 };
 
-exports.getAllRoles = function() {
+exports.getAllRoles = function(headers) {
     var options = {
         resolveWithFullResponse: true,
         uri: url,
-        method: 'GET'
+        method: 'GET',
+        headers: headers
     };
 
     return request(options)
