@@ -5,6 +5,7 @@ var express = require('express');
 var request = require('request');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
+var cors = require('cors');
 
 var profileRoutes = require('./routes/profile.routes')(express.Router());
 var officeRoutes = require('./routes/office.routes')(express.Router());
