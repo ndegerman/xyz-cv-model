@@ -40,7 +40,6 @@ app.use(cors());
 
 app.use(authenticationMiddleware.authentication);
 app.use(responseMiddleware.nocache);
-app.use(responseMiddleware.accessControl);
 
 app.use('/profile', profileRoutes);
 app.use('/office', officeRoutes);
