@@ -35,8 +35,8 @@ app.use(morgan('dev'));
 
 // ROUTES & MIDDLEWARE
 // ============================================================================
-app.options('*', cors());
-app.use(cors());
+app.options('*', cors({credentials: true, origin: true}));
+app.use(cors({credentials: true, origin: true}));
 
 app.use(authenticationMiddleware.authentication);
 app.use(responseMiddleware.nocache);
