@@ -7,10 +7,10 @@ exports.extractPropertiesFromConnectors = function(property, connectors, extraPr
         var list = [];
         connectors.forEach(function(connector) {
             var object = {};
-            object['_id'] = connector[property];
+            object._id = connector[property];
 
             extraProps.forEach(function(prop) {
-                object[prop] = connector[prop]
+                object[prop] = connector[prop];
             });
 
             list.push(object);
@@ -19,9 +19,6 @@ exports.extractPropertiesFromConnectors = function(property, connectors, extraPr
         return resolve(list);
     });
 };
-
-//list is a list of skills
-//objects is a list of [{id: idprop, eaxtraProp1: extraprop!, extraProp2: extraProp2...}], ..
 
 exports.matchListAndObjectIds = function(list) {
     return function(objects) {
@@ -33,8 +30,10 @@ exports.matchListAndObjectIds = function(list) {
                         items.push(mergeProperties(object, item));
                         return true;
                     }
+
                 });
             });
+
             Promise.all(items)
                 .then(resolve);
         });
@@ -47,14 +46,17 @@ exports.sortListByProperty = function(list, prop) {
             if (a[prop] > b[prop]) {
                 return 1;
             }
+
             if (a[prop] < b[prop]) {
                 return -1;
             }
+
             return 0;
-        })
+        });
+
         return resolve(list);
     });
-}
+};
 
 // HELPER
 // ============================================================================
@@ -70,9 +72,7 @@ function mergeProperties(from, to) {
                 to[prop] = from[prop];
             }
         }
+
         return resolve(to);
     });
 }
-
-// idprop, extraProps => [{id: idprop, eaxtraProp1: extraprop!, extraProp2: extraProp2...}]
-// propObjs, objs: sort by obj.id, return objs with matching props

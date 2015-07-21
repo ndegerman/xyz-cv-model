@@ -69,11 +69,11 @@ function loadSkillsForUser(headers) {
         var connectors = userToSkillResource.getUserToSkillConnectorsByUserId(user._id, headers);
         var skills = skillResource.getAllSkills(headers);
         return Promise.all([connectors, skills])
-            .then(function(){
-                return matchSkillsAndConnectors(skills.value(), connectors.value())
+            .then(function() {
+                return matchSkillsAndConnectors(skills.value(), connectors.value());
             })
             .then(setSkillsForUser(user));
-    }
+    };
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
