@@ -77,8 +77,8 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-    return utils.extractPropertyFromConnectors('skillId', connectors)
-        .then(utils.matchListAndIds(skills));
+    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'years'])
+        .then(utils.matchListAndObjectIds(skills));
 }
 
 function setSkillsForUser(user) {
