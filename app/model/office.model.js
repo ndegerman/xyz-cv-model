@@ -62,7 +62,7 @@ function loadSkillFrequencyMap(headers) {
                 return createSkillFrequencyMap(skills.value())
                     .then(populateSkillFrequencyMap(model, userToOfficeConnectors.value(), userToSkillConnectors.value()))
                     .then(setSkillFrequencyMap(model));
-            })
+            });
     };
 }
 
@@ -83,7 +83,7 @@ function populateSkillFrequencyMap(model, userToOfficeConnectors, userToSkillCon
         userToOfficeConnectors = utils.sortListByProperty(userToOfficeConnectors, 'userId');
         userToSkillConnectors = utils.sortListByProperty(userToSkillConnectors, 'userId');
         return Promise.all([userToOfficeConnectors, userToSkillConnectors])
-            .then(function(){
+            .then(function() {
                 var index = 0;
                 var skillConnectors = [];
                 var promises = [];
@@ -91,25 +91,29 @@ function populateSkillFrequencyMap(model, userToOfficeConnectors, userToSkillCon
                 userToSkillConnectors = userToSkillConnectors.value();
                 userToOfficeConnectors.forEach(function(userToOfficeConnector) {
                     for (var i = index; i < userToSkillConnectors.length; i++) {
-                        if(userToSkillConnectors[i].userId > userToOfficeConnector.userId) {
+                        if (userToSkillConnectors[i].userId > userToOfficeConnector.userId) {
                             index = i;
                             break;
                         }
+
                         if (userToSkillConnectors[i].userId < userToOfficeConnector.userId) {
                             continue;
                         }
+
                         skillConnectors.push(userToSkillConnectors[i]);
                     }
+
                     promises.push(addFrequenciesForMap(map, skillConnectors));
                     skillConnectors = [];
-                })
+                });
+
                 return Promise.all(promises)
                     .then(function() {
                         return new Promise(function(resolve) {
                             return resolve(map);
-                        })
-                    })
-            })
+                        });
+                    });
+            });
     };
 }
 
@@ -117,8 +121,9 @@ function addFrequenciesForMap(map, connectors) {
     return new Promise(function(resolve) {
         connectors.forEach(function(connector) {
             map[connector.skillId].users++;
-        })
-        return resolve(map)
+        });
+
+        return resolve(map);
     });
 }
 
