@@ -4,6 +4,8 @@ var officeResource = require('../resource/office.resource');
 var userResource = require('../resource/user.resource');
 var roleResource = require('../resource/role.resource');
 var skillResource = require('../resource/skill.resource');
+var assignmentResource = require('../resource/assignment.resource');
+var userToAssignmentResource = require('../resource/userToAssignmentConnector.resource');
 var userToOfficeResource = require('../resource/userToOfficeConnector.resource');
 var attributeResource = require('../resource/attribute.resource');
 var roleToAttributeResource = require('../resource/roleToAttributeConnector.resource');
@@ -39,6 +41,7 @@ function loadUser(id, headers) {
         return userResource.getUserById(id, headers)
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
+            .then(loadAssignmentsForUser(headers))
             .then(setUser(model));
     };
 }
@@ -48,6 +51,7 @@ function loadCurrentUser(headers) {
         return userResource.getCurrentUser(headers)
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
+            .then(loadAssignmentsForUser(headers))
             .then(setUser(model));
     };
 }
@@ -109,3 +113,31 @@ function setRoleForUser(user) {
     };
 }
 
+// ASSIGNMENTS
+// ============================================================================
+
+function loadAssignmentsForUser(headers) {
+    return function(user) {
+        var connectors = userToAssignmentResource.getUserToAssignmentConnectorsByUserId(user._id, headers);
+        var assignments = assignmentResource.getAllAssignments(headers);
+        return Promise.all([connectors, assignments])
+            .then(function() {
+                return matchAssignmentsAndConnectors(assignments.value(), connectors.value());
+            })
+            .then(setAssignmentsForUser(user));
+    };
+}
+
+function matchAssignmentsAndConnectors(assignments, connectors) {
+    return utils.extractPropertiesFromConnectors('assignmentId', connectors, null)
+        .then(utils.matchListAndObjectIds(assignments));
+}
+
+function setAssignmentsForUser(user) {
+    return function(assignments) {
+        return new Promise(function(resolve) {
+            user.assignments = assignments;
+            return resolve(user);
+        });
+    };
+}

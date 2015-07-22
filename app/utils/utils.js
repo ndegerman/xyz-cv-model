@@ -8,10 +8,11 @@ exports.extractPropertiesFromConnectors = function(property, connectors, extraPr
         connectors.forEach(function(connector) {
             var object = {};
             object._id = connector[property];
-
-            extraProps.forEach(function(prop) {
-                object[prop] = connector[prop];
-            });
+            if (extraProps) {
+                extraProps.forEach(function(prop) {
+                    object[prop] = connector[prop];
+                });
+            }
 
             list.push(object);
         });
