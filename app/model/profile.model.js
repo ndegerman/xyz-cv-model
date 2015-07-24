@@ -42,7 +42,7 @@ function loadUser(id, headers) {
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
-            .then(setUser(model));
+            .then(utils.setFieldForObject(model, 'user'));
     };
 }
 
@@ -52,16 +52,7 @@ function loadCurrentUser(headers) {
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
-            .then(setUser(model));
-    };
-}
-
-function setUser(model) {
-    return function(user) {
-        return new Promise(function(resolve) {
-            model.user = user;
-            resolve(model);
-        });
+            .then(utils.setFieldForObject(model, 'user'));
     };
 }
 
@@ -76,7 +67,7 @@ function loadSkillsForUser(headers) {
             .then(function() {
                 return matchSkillsAndConnectors(skills.value(), connectors.value());
             })
-            .then(setSkillsForUser(user));
+            .then(utils.setFieldForObject(user, 'skills'));
     };
 }
 
@@ -85,31 +76,13 @@ function matchSkillsAndConnectors(skills, connectors) {
         .then(utils.matchListAndObjectIds(skills));
 }
 
-function setSkillsForUser(user) {
-    return function(skills) {
-        return new Promise(function(resolve) {
-            user.skills = skills;
-            return resolve(user);
-        });
-    };
-}
-
 // ROLE
 // ============================================================================
 
 function loadRoleForUser(headers) {
     return function(user) {
         return roleResource.getRoleByName(user.role, headers)
-            .then(setRoleForUser(user));
-    };
-}
-
-function setRoleForUser(user) {
-    return function(role) {
-        return new Promise(function(resolve) {
-            user.role = role;
-            return resolve(user);
-        });
+            .then(utils.setFieldForObject(user, 'role'));
     };
 }
 
@@ -122,22 +95,28 @@ function loadAssignmentsForUser(headers) {
         var assignments = assignmentResource.getAllAssignments(headers);
         return Promise.all([connectors, assignments])
             .then(function() {
-                return matchAssignmentsAndConnectors(assignments.value(), connectors.value());
+                return matchAssignmentsAndConnectors(assignments.value(), connectors.value())
+                    .then(loadSkillsForAssignments(headers));
             })
-            .then(setAssignmentsForUser(user));
+            .then(utils.setFieldForObject(user, 'assignments'));
     };
 }
 
 function matchAssignmentsAndConnectors(assignments, connectors) {
-    return utils.extractPropertiesFromConnectors('assignmentId', connectors, null)
+    return utils.extractPropertiesFromConnectors('assignmentId', connectors, ['skills', 'dateFrom', 'dateTo', 'description'])
         .then(utils.matchListAndObjectIds(assignments));
 }
 
-function setAssignmentsForUser(user) {
+function loadSkillsForAssignments(headers) {
     return function(assignments) {
-        return new Promise(function(resolve) {
-            user.assignments = assignments;
-            return resolve(user);
-        });
+        return skillResource.getAllSkills(headers)
+            .then(function(skills) {
+                var promises = [];
+                assignments.forEach(function(assignment) {
+                    promises.push(utils.matchIdsAndObjects(assignment.skills, skills)
+                        .then(utils.setFieldForObject(assignment, 'skills')));
+                });
+                return Promise.all(promises);
+            })
     };
 }
