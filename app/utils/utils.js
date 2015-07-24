@@ -41,6 +41,24 @@ exports.matchListAndObjectIds = function(list) {
     };
 };
 
+exports.matchIdsAndObjects = function(ids, objects) {
+    return new Promise(function(resolve) {
+        var items = [];
+        ids.forEach(function(id) {
+            objects.some(function(object) {
+                if (object._id === id) {
+                    items.push(object);
+                    return true;
+                }
+
+            });
+        });
+
+        Promise.all(items)
+            .then(resolve);
+    });
+};
+
 exports.sortListByProperty = function(list, prop) {
     return new Promise(function(resolve) {
         list.sort(function(a, b) {
@@ -57,6 +75,15 @@ exports.sortListByProperty = function(list, prop) {
 
         return resolve(list);
     });
+};
+
+exports.setFieldForObject = function(object, fieldName) {
+    return function(field) {
+        return new Promise(function(resolve) {
+            object[fieldName] = field;
+            return resolve(object);
+        });
+    };
 };
 
 // HELPER
@@ -77,3 +104,4 @@ function mergeProperties(from, to) {
         return resolve(to);
     });
 }
+
