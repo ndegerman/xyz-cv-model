@@ -42,6 +42,7 @@ function loadUser(id, headers) {
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
+            .then(loadOfficeForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
 }
@@ -52,6 +53,7 @@ function loadCurrentUser(headers) {
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
+            .then(loadOfficeForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
 }
@@ -84,6 +86,20 @@ function loadRoleForUser(headers) {
         return roleResource.getRoleByName(user.role, headers)
             .then(utils.setFieldForObject(user, 'role'));
     };
+}
+
+// OFFICE
+// ============================================================================
+
+function loadOfficeForUser(headers) {
+    return function(user) {
+        return userToOfficeResource.getUserToOfficeConnectorsByUserId(user._id, headers)
+            .then(function(connectors) {
+                var connector = connectors[0];
+                return officeResource.getOfficeById(connector.officeId, headers)
+                    .then(utils.setFieldForObject(user, 'office'));
+            })
+    }
 }
 
 // ASSIGNMENTS
