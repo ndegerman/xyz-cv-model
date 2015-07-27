@@ -71,6 +71,8 @@ function loadSkillsForUser(headers) {
             .then(function() {
                 return matchSkillsAndConnectors(skills.value(), connectors.value());
             })
+            .then(utils.sortListByProperty('level'))
+            .then(utils.reverseList)
             .then(utils.setFieldForObject(user, 'skills'));
     };
 }
@@ -98,8 +100,12 @@ function loadOfficeForUser(headers) {
         return userToOfficeResource.getUserToOfficeConnectorsByUserId(user._id, headers)
             .then(function(connectors) {
                 var connector = connectors[0];
-                return officeResource.getOfficeById(connector.officeId, headers)
-                    .then(utils.setFieldForObject(user, 'office'));
+                if (connector) {
+                    return officeResource.getOfficeById(connector.officeId, headers)
+                        .then(utils.setFieldForObject(user, 'office'));
+                }
+
+                return utils.setFieldForObject(user, 'office')(null);
             })
     }
 }
@@ -256,9 +262,15 @@ function loadMapAssignments(model){
 function loadMapGeneralInfo(model) {
     return function(map) {
         return new Promise(function(resolve) {
-            map[model.user.office.name] = {text: model.user.office.name, weight: 1};
-            map[model.user.country] = {text: model.user.country, weight: 1};
-            map[model.user.country] = {text: model.user.role.name, weight: 1};
+            if (model.user.office) {
+                map[model.user.office.name] = {text: model.user.office.name, weight: 1};
+            }
+            if (model.user.country) {
+                map[model.user.country] = {text: model.user.country, weight: 1};
+            }
+            if (model.user.role) {
+                map[model.user.role.name] = {text: model.user.role.name, weight: 1};
+            }
             return resolve(map);
         });
     }
