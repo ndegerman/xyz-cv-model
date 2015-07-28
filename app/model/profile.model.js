@@ -4,6 +4,7 @@ var officeResource = require('../resource/office.resource');
 var userResource = require('../resource/user.resource');
 var roleResource = require('../resource/role.resource');
 var skillResource = require('../resource/skill.resource');
+var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
 var userToAssignmentResource = require('../resource/userToAssignmentConnector.resource');
 var userToOfficeResource = require('../resource/userToOfficeConnector.resource');
@@ -41,6 +42,7 @@ exports.getCurrentProfileModel = function(headers) {
 function loadUser(id, headers) {
     return function(model) {
         return userResource.getUserById(id, headers)
+            .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
@@ -52,6 +54,7 @@ function loadUser(id, headers) {
 function loadCurrentUser(headers) {
     return function(model) {
         return userResource.getCurrentUser(headers)
+            .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
@@ -143,6 +146,23 @@ function loadSkillsForAssignments(headers) {
                 return Promise.all(promises);
             })
     };
+}
+
+// PROFILE IMAGE
+// ============================================================================
+
+function loadProfileImageForUser(headers) {
+    return function(user) {
+        return new Promise(function(resolve) {
+            if (!user.profileImage) {
+                return resolve(user);
+            } else {
+                return fileResource.getFileById(user.profileImage, headers)
+                    .then(utils.setFieldForObject(user, 'profileImage'))
+                    .then(resolve);
+            }
+        })
+    }
 }
 
 // CLOUD
@@ -275,4 +295,3 @@ function loadMapGeneralInfo(model) {
         });
     }
 }
-
