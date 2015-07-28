@@ -80,8 +80,8 @@ function createSkillFrequencyMap(skills) {
 
 function populateSkillFrequencyMap(model, userToOfficeConnectors, userToSkillConnectors) {
     return function(map) {
-        userToOfficeConnectors = utils.sortListByProperty(userToOfficeConnectors, 'userId');
-        userToSkillConnectors = utils.sortListByProperty(userToSkillConnectors, 'userId');
+        userToOfficeConnectors = utils.sortListByProperty('userId')(userToOfficeConnectors);
+        userToSkillConnectors = utils.sortListByProperty('userId')(userToSkillConnectors);
         return Promise.all([userToOfficeConnectors, userToSkillConnectors])
             .then(function() {
                 var index = 0;

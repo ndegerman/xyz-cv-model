@@ -26,12 +26,14 @@ function getProfileTemplate() {
 
 exports.getProfileModelByUserId = function(id, headers) {
     return getProfileTemplate()
-        .then(loadUser(id, headers));
+        .then(loadUser(id, headers))
+        .then(loadCloud);
 };
 
 exports.getCurrentProfileModel = function(headers) {
     return getProfileTemplate()
-        .then(loadCurrentUser(headers));
+        .then(loadCurrentUser(headers))
+        .then(loadCloud);
 };
 
 // USER
@@ -72,6 +74,8 @@ function loadSkillsForUser(headers) {
             .then(function() {
                 return matchSkillsAndConnectors(skills.value(), connectors.value());
             })
+            .then(utils.sortListByProperty('level'))
+            .then(utils.reverseList)
             .then(utils.setFieldForObject(user, 'skills'));
     };
 }
@@ -99,8 +103,12 @@ function loadOfficeForUser(headers) {
         return userToOfficeResource.getUserToOfficeConnectorsByUserId(user._id, headers)
             .then(function(connectors) {
                 var connector = connectors[0];
-                return officeResource.getOfficeById(connector.officeId, headers)
-                    .then(utils.setFieldForObject(user, 'office'));
+                if (connector) {
+                    return officeResource.getOfficeById(connector.officeId, headers)
+                        .then(utils.setFieldForObject(user, 'office'));
+                }
+
+                return utils.setFieldForObject(user, 'office')(null);
             })
     }
 }
