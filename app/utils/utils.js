@@ -76,14 +76,14 @@ exports.sortListByProperty = function(prop) {
 
             return resolve(list);
         });
-    }
+    };
 };
 
 exports.reverseList = function(list) {
     return new Promise(function(resolve) {
         return resolve(list.reverse());
-    })
-}
+    });
+};
 
 exports.setFieldForObject = function(object, fieldName) {
     return function(field) {
@@ -92,6 +92,33 @@ exports.setFieldForObject = function(object, fieldName) {
             return resolve(object);
         });
     };
+};
+
+exports.addFieldsFromObjects = function(set, fields) {
+    return function(objects) {
+        return new Promise(function(resolve) {
+            objects.forEach(function(object) {
+                fields.forEach(function(field) {
+                    if (object[field]) {
+                        set[object[field]] = true;
+                    }
+                });
+            });
+
+            return resolve(set);
+        });
+    };
+};
+
+exports.convertSetToList = function(set) {
+    return new Promise(function(resolve) {
+        var list = [];
+        for (var element in set) {
+            list.push(element);
+        }
+
+        return resolve(list);
+    });
 };
 
 // HELPER
