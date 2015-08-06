@@ -9,6 +9,7 @@ var cors = require('cors');
 
 var profileRoutes = require('./routes/profile.routes')(express.Router());
 var officeRoutes = require('./routes/office.routes')(express.Router());
+var peopleRoutes = require('./routes/people.routes')(express.Router());
 
 var errorMiddleware = require('./middleware/error.middleware');
 var authenticationMiddleware = require('./middleware/authentication.middleware');
@@ -43,6 +44,7 @@ app.use(responseMiddleware.nocache);
 
 app.use('/profile', profileRoutes);
 app.use('/office', officeRoutes);
+app.use('/people', peopleRoutes);
 
 app.use(errorMiddleware.errorFilter);
 

@@ -109,8 +109,8 @@ function loadOfficeForUser(headers) {
                 }
 
                 return utils.setFieldForObject(user, 'office')(null);
-            })
-    }
+            });
+    };
 }
 
 // ASSIGNMENTS
@@ -143,8 +143,9 @@ function loadSkillsForAssignments(headers) {
                     promises.push(utils.matchIdsAndObjects(assignment.skills, skills)
                         .then(utils.setFieldForObject(assignment, 'skills')));
                 });
+
                 return Promise.all(promises);
-            })
+            });
     };
 }
 
@@ -161,8 +162,8 @@ function loadProfileImageForUser(headers) {
                     .then(utils.setFieldForObject(user, 'profileImage'))
                     .then(resolve);
             }
-        })
-    }
+        });
+    };
 }
 
 // CLOUD
@@ -188,7 +189,7 @@ function loadCloudWords(cloud) {
     return getWordsFromMap(cloud.map)
         .then(utils.sortListByProperty('weight'))
         .then(utils.reverseList)
-        .then(utils.setFieldForObject(cloud,'words'));
+        .then(utils.setFieldForObject(cloud, 'words'));
 }
 
 function loadCloudMaxWeight(cloud) {
@@ -226,7 +227,7 @@ function getMaxWeightFromWords(words) {
 function setOpacityForWords(cloud) {
     return new Promise(function(resolve) {
         cloud.words.forEach(function(word) {
-            word.opacity = word.weight/cloud.maxWeight;
+            word.opacity = word.weight / cloud.maxWeight;
         });
 
         return resolve(cloud);
@@ -240,6 +241,7 @@ function loadMapSkills(model) {
                 if (map[skill.name]) {
                     return;
                 }
+
                 var word = {};
                 word.text = skill.name;
                 word.weight = skill.level;
@@ -248,10 +250,10 @@ function loadMapSkills(model) {
 
             return resolve(map);
         });
-    }
+    };
 }
 
-function loadMapAssignments(model){
+function loadMapAssignments(model) {
     return function(map) {
         return new Promise(function(resolve) {
             model.user.assignments.forEach(function(assignment) {
@@ -259,21 +261,24 @@ function loadMapAssignments(model){
                     map[assignment.name].weight += 1;
                     return;
                 }
+
                 var word = {};
                 word.text = assignment.name;
                 word.weight = 1;
-                map[assignment.name] = word
+                map[assignment.name] = word;
                 assignment.skills.forEach(function(skill) {
                     if (map[skill.name]) {
                         map[skill.name].weight += 1;
                         return;
                     }
+
                     var word = {};
                     word.text = skill.name;
                     word.weight = 1;
                     map[skill.name] = word;
                 });
             });
+
             return resolve(map);
         });
     };
@@ -285,13 +290,16 @@ function loadMapGeneralInfo(model) {
             if (model.user.office) {
                 map[model.user.office.name] = {text: model.user.office.name, weight: 1};
             }
+
             if (model.user.country) {
                 map[model.user.country] = {text: model.user.country, weight: 1};
             }
+
             if (model.user.role) {
                 map[model.user.role.name] = {text: model.user.role.name, weight: 1};
             }
+
             return resolve(map);
         });
-    }
+    };
 }

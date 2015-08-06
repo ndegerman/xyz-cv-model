@@ -76,14 +76,14 @@ exports.sortListByProperty = function(prop) {
 
             return resolve(list);
         });
-    }
+    };
 };
 
 exports.reverseList = function(list) {
     return new Promise(function(resolve) {
         return resolve(list.reverse());
-    })
-}
+    });
+};
 
 exports.setFieldForObject = function(object, fieldName) {
     return function(field) {
