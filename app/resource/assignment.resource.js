@@ -15,7 +15,7 @@ exports.getAssignmentById = function(id, headers) {
         json: true,
         headers: headers
     };
-    console.log('in getAssignmentById', options);
+
     return request(options)
         .then(responseHandler.parseGet)
         .catch(errorHandler.throwDREAMSHttpError);

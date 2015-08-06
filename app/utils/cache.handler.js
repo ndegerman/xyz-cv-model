@@ -38,7 +38,6 @@ exports.softsetToTagObjectCache = function(tag, object) {
                 } else {
                     currentContent[collectionId] = object[collectionId];
                 }
-
             }
 
             return resolve();
@@ -80,28 +79,3 @@ exports.GetGreaterIds = function(tagName, regex, collectionId) {
     });
 };
 
-// function getSmallestLargerTag(tag, regex) {
-//     var tagNumber = parseInt(tag.substring(7, tag.length));
-
-//     var smallestBig = tag;
-//     var smallestBigNumber = Number.MAX_VALUE;
-
-//     return exports.getFullTagObjectCache()
-//         .then(function(fullCache) {
-//             return new Promise(function(resolve) {
-//                 for (var otherTag in fullCache) {
-//                     if (fullCache.hasOwnProperty(tag) {
-//                         if (otherTag.match(regex)) {
-//                             var currentLength = parseInt(otherTag.substring(7, otherTag.length));
-//                             if (currentLength > tagNumber && currentLength <= smallestBigNumber) {
-//                                 smallestBigNumber = currentLength;
-//                                 smallestBig = otherTag;
-//                             }
-//                         }
-//                     }
-//                 }
-
-//                 return resolve(smallestBig);
-//             });
-//         });
-// }
