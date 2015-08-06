@@ -45,3 +45,16 @@ exports.getAllUserToSkillConnectors = function(headers) {
         .then(responseHandler.parseGetPolyQuery)
         .catch(errorHandler.throwDREAMSHttpError);
 };
+
+exports.getUserToSkillConnectorById = function(id, headers) {
+    var options = {
+        resolveWithFullResponse: true,
+        uri: url + '/' + id,
+        method: 'GET',
+        headers: headers
+    };
+
+    return request(options)
+        .then(responseHandler.parseGet)
+        .catch(errorHandler.throwDREAMSHttpError);
+};

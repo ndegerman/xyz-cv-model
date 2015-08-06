@@ -38,6 +38,7 @@ exports.parseGetPolyQuery = function(response) {
 };
 
 exports.parseGetMonoQuery = function(response) {
+    console.log(response);
     return checkResponse(response)
         .then(checkStatusCode(200))
         .then(parseMonoQuery);

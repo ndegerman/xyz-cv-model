@@ -33,3 +33,16 @@ exports.getAllSkills = function(headers) {
         .then(responseHandler.parseGetPolyQuery)
         .catch(errorHandler.throwDREAMSHttpError);
 };
+
+exports.getSkillByName = function(name, headers) {
+    var options = {
+        resolveWithFullResponse: true,
+        uri: url + '/query?name=' + name,
+        method: 'GET',
+        headers: headers
+    };
+
+    return request(options)
+        .then(responseHandler.parseGetMonoQuery)
+        .catch(errorHandler.throwDREAMSHttpError);
+};
