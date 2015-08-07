@@ -10,7 +10,7 @@ var url = config.API_URL + 'userToOfficeConnector';
 exports.getUserToOfficeConnectorsByOfficeId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/office/' + id,
+        uri: url + '?officeId=' + id,
         method: 'GET',
         headers: headers
     };
@@ -23,7 +23,7 @@ exports.getUserToOfficeConnectorsByOfficeId = function(id, headers) {
 exports.getUserToOfficeConnectorsByUserId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/user/' + id,
+        uri: url + '?userId=' + id,
         method: 'GET',
         headers: headers
     };

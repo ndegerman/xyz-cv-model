@@ -10,11 +10,11 @@ var url = config.API_URL + 'role';
 exports.getRoleByName = function(name, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/query?name=' + name,
+        uri: url + '?name=' + name,
         method: 'GET',
         headers: headers
     };
-
+    
     return request(options)
         .then(responseHandler.parseGet)
         .catch(errorHandler.throwDREAMSHttpError);
