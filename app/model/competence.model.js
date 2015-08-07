@@ -15,6 +15,7 @@ exports.getCompetenceModel = function(headers) {
 
 function setOfficeNames(headers) {
     return function(model) {
+        var officeNamesObj;
         return officeResource.getAllOffices(headers)
             .then(function(officeObjects) {
                 var allOfficeNames = [];
@@ -22,7 +23,8 @@ function setOfficeNames(headers) {
                     allOfficeNames.push(office.name);
                 });
 
-                model.offices.push(JSON.parse(JSON.stringify({offices: allOfficeNames})));
+                officeNamesObj = {offices: allOfficeNames};
+                model.offices.push(officeNamesObj);
                 return model;
             });
     };
@@ -83,11 +85,13 @@ function getListOfUsersWithLevelForSkill(users, connectors, offices, skill, user
     var userList = [];
     var userLevel;
     var officeNameForUser;
+    var userObj;
 
     users.map(function(user) {
         userLevel = getSkillLevelForUser(connectors, user._id, skill._id);
         officeNameForUser = getOfficeNameForUser(userToOfficeConnectors, offices, user._id);
-        userList.push(JSON.parse(JSON.stringify({name: user.name, level: userLevel, office: officeNameForUser, userId: user._id})));
+        userObj = {name: user.name, level: userLevel, office: officeNameForUser, userId: user._id};
+        userList.push(userObj);
     });
 
     return userList;
@@ -102,22 +106,28 @@ function setCompetence(headers) {
         var skills = skillResource.getAllSkills(headers);
         var offices = officeResource.getAllOffices(headers);
         var allSkillNames = [];
+        var skillNamesObj;
+        var skillObj;
 
-        return Promise.all([connectors, users, skills, userToOfficeConnectors, offices]).then(function() {
-            users = users.value();
-            connectors = connectors.value();
-            skills = skills.value();
-            offices = offices.value();
-            userToOfficeConnectors = userToOfficeConnectors.value();
+        return Promise.all([connectors, users, skills, userToOfficeConnectors, offices])
+            .then(function() {
+                users = users.value();
+                connectors = connectors.value();
+                skills = skills.value();
+                offices = offices.value();
+                userToOfficeConnectors = userToOfficeConnectors.value();
 
-            skills.map(function(skill) {
-                var userList = getListOfUsersWithLevelForSkill(users, connectors, offices, skill, userToOfficeConnectors);
-                allSkillNames.push(skill.name);
-                model.competence.push(JSON.parse(JSON.stringify({skill: skill.name, users: userList})));
+                skills.map(function(skill) {
+                    var userList = getListOfUsersWithLevelForSkill(users, connectors, offices, skill, userToOfficeConnectors);
+                    allSkillNames.push(skill.name);
+                    skillObj = {skill: skill.name, users: userList};
+                    model.competence.push(skillObj);
+                });
+
+                skillNamesObj = {skills: allSkillNames};
+
+                model.skills.push(skillNamesObj);
+                return model;
             });
-
-            model.skills.push(JSON.parse(JSON.stringify({skills: allSkillNames})));
-            return model;
-        });
     };
 }
