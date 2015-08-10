@@ -10,7 +10,7 @@ var errorHandler = require('../utils/error.handler');
 exports.getRoleToAttributeConnectorsByAttributeId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/attribute/' + id,
+        uri: url + '?attributeId=' + id,
         method: 'GET',
         headers: headers
     };
@@ -23,7 +23,7 @@ exports.getRoleToAttributeConnectorsByAttributeId = function(id, headers) {
 exports.getRoleToAttributeConnectorsByRoleId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/role/' + id,
+        uri: url + '?roleId=' + id,
         method: 'GET',
         headers: headers
     };
