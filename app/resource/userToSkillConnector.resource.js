@@ -10,7 +10,7 @@ var url = config.API_URL + 'userToSkillConnector';
 exports.getUserToSkillConnectorsBySkillId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/skill/' + id,
+        uri: url + '?skillId=' + id,
         method: 'GET',
         headers: headers
     };
@@ -23,7 +23,7 @@ exports.getUserToSkillConnectorsBySkillId = function(id, headers) {
 exports.getUserToSkillConnectorsByUserId = function(id, headers) {
     var options = {
         resolveWithFullResponse: true,
-        uri: url + '/user/' + id,
+        uri: url + '?userId=' + id,
         method: 'GET',
         headers: headers
     };
