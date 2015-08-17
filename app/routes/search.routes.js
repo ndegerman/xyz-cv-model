@@ -10,15 +10,23 @@ var cacheHandler = require('../utils/cache.handler');
 
 module.exports = function(routes) {
 
-    // get search object
+    // get search tags
     routes.get('/', function(request, response) {
         searchModel.getSearchModel(request.headers)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });
 
-    routes.get('/query', function(request, response) {
-        searchModel.getObjectsForTags(request.headers, request.query.tags)
+    routes.get('/advancedSearch', function(request, response) {
+        var query = JSON.parse(request.query.parameters);
+        searchModel.getObjectsForTags(request.headers, query.tags)
+            .then(searchModel.filterBySkills(request.headers, query.refinedSkills))
+            .then(responseHandler.sendJsonResponse(response))
+            .catch(responseHandler.sendErrorResponse(response));
+    });
+
+    routes.get('/simpleSearch', function(request, response) {
+        searchModel.getObjectsForTag(request.headers, request.query.tag)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });

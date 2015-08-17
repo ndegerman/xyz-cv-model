@@ -102,10 +102,6 @@ exports.addFieldsFromObjects = function(set, fields, collectionId) {
             objects.forEach(function(object) {
                 fields.forEach(function(field) {
                     if (object[field]) {
-                        if (isConnectorField(field)) {
-                            object[field] = field + ': ' + object[field];
-                        }
-
                         set[object[field]] = true;
                         var  objectForCache = {};
                         objectForCache[collectionId] = [object._id];
@@ -221,12 +217,4 @@ function mergeProperties(from, to) {
 
         return resolve(to);
     });
-}
-
-function isConnectorField(field) {
-    if (field === 'level' || field === 'years') {
-        return true;
-    } else {
-        return false;
-    }
 }

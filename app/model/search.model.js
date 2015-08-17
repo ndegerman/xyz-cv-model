@@ -15,7 +15,7 @@ var Promise = require('bluebird');
 var cacheHandler = require('../utils/cache.handler');
 var errorHandler = require('../utils/error.handler');
 var responseHandler = require('../utils/response.handler');
-var acceptedSkills = [];
+var profileModel = require('./profile.model');
 
 function getSearchTemplate() {
     return new Promise(function(resolve) {
@@ -28,8 +28,7 @@ function getSearchTemplate() {
 }
 
 exports.getSearchModel = function(headers) {
-    return addLevelsAndYearsToCache()
-        .then(getSearchTemplate)
+    return getSearchTemplate()
         .then(loadTagList(headers));
 };
 
@@ -39,13 +38,11 @@ exports.getSearchModel = function(headers) {
 function loadTagList(headers) {
     return function(model) {
         var tagSet = Object.create(null);
-
         return loadUsers(tagSet, headers)
             .then(loadOffices(headers))
             .then(loadSkills(headers))
             .then(loadRoles(headers))
             .then(loadAssignments(headers))
-            .then(loadUserToSkillConnectors(headers))
             .then(utils.convertSetToList)
             .then(utils.setFieldForObject(model, 'tagList'));
     };
@@ -84,74 +81,168 @@ function loadAssignments(headers) {
     };
 }
 
-function loadUserToSkillConnectors(headers) {
-    return function(tagSet) {
-        return userToSkillResource.getAllUserToSkillConnectors(headers)
-            .then(utils.addFieldsFromObjects(tagSet, ['level', 'years'], 'COLLECTION_USERTOSKILL'));
-    };
-}
-
-function addLevelsAndYearsToCache() {
-    return new Promise(function(resolve) {
-        var list = [];
-        for (var i = 1; i <= 5; i++) {
-            list.push(cacheHandler.softsetToTagObjectCache('level: ' + i, {COLLECTION_USERTOSKILL: []}));
-        }
-
-        for (var j = 1; j <= 50; j++) {
-            list.push(cacheHandler.softsetToTagObjectCache('years: ' + j, {COLLECTION_USERTOSKILL: []}));
-        }
-
-        return Promise.all(list)
-            .then(resolve);
-    });
-}
-
 // RETRIEVING BY TAGS
 // ===============================================================================
 
-function getSearchSetForTags(tags, headers) {
-    return function() {
-        var promises = [];
-        tags.forEach(function(tag) {
-            promises.push(cacheHandler.getFromTagObjectCache(tag.toLowerCase())
-                .then(getSearchSet(headers, tag.toLowerCase())));
-        });
-
-        return Promise.all(promises);
-    };
-}
-
-exports.getObjectsForTags = function(headers, tags) {
+exports.getObjectsForTags = function(headers, tags, fullSearch) {
     return new Promise(function(resolve, reject) {
-        if (!tags) {
-            return errorHandler.getHttpError(400)
-                .then(reject);
+        if (!tags || tags.length === 0) {
+            return userResource.getAllUsers(headers)
+                .then(resolve);
         }
 
-        cacheHandler.getFullTagObjectCache()
-            .then(getAcceptedSkills(tags))
-            .then(getSearchSetForTags(tags, headers))
+        return getSearchSetForTags(tags, headers, fullSearch)
             .then(utils.intersectionObjects)
             .then(resolve);
     });
 };
 
-function getSearchSet(headers, tagName) {
-    return function(tag) {
+exports.getObjectsForTag = function(headers, tag) {
+    return new Promise(function(resolve, reject) {
+        if (!tag || tag.length > 1) {
+            return errorHandler.getHttpError(400)
+                .then(reject);
+        }
+
+        exports.getObjectsForTags(headers, tag, true)
+            .then(resolve);
+    });
+};
+
+exports.getProfilesForUsers = function(headers) {
+    return function(users) {
         return new Promise(function(resolve) {
-            if (!tag) {
+            var list = [];
+            users.forEach(function(user) {
+                list.push(profileModel.getProfileModelByUserId(user._id, headers));
+            })
+
+            return Promise.all(list)
+                .then(resolve);
+        });
+    };
+};
+
+exports.filterBySkills = function(headers, refinedList) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (!refinedList || refinedList.length === 0) {
+                return resolve(users);
+            } else {
+                return resolve(filterUsersBySkill(headers, users, refinedList, 0));
+            }
+        });
+    };
+};
+
+function filterUsersBySkill(headers, users, refinedList, index) {
+    return new Promise(function(resolve) {
+        if (refinedList.length <= index) {
+            return resolve(users);
+        } else {
+            var currentSkill = refinedList[index];
+            cacheHandler.getFromTagObjectCache(currentSkill.name.toLowerCase())
+                .then(getConnectorsForSkillObject(headers))
+                .then(filterConnectorsByCriteria({level: currentSkill.level, years: currentSkill.years}))
+                .then(matchUsersAndConnectorsCurry(users))
+                .then(filterUsersBySkill(headers, users, refinedList, index + 1))
+                .then(resolve);
+        }
+    });
+}
+
+function getConnectorsForSkillObject(headers) {
+    return function(skillObject) {
+        return new Promise(function(resolve, reject) {
+            var connectors = [];
+            var list = [];
+            skillObject.forEach(function(collectionIdObject) {
+                for (var collectionId in collectionIdObject) {
+                    if (collectionIdObject.hasOwnProperty(collectionId)) {
+                        if (collectionId.match('COLLECTION_SKILL')) {
+                            list = collectionIdObject[collectionId];
+                        }
+                    }
+                }
+
+            });
+
+            if (list.length === 0) {
+                return reject();
+            }
+
+            list.forEach(function(id) {
+                connectors.push(userToSkillResource.getUserToSkillConnectorsBySkillId(id, headers));
+            })
+
+            return Promise.all(connectors)
+                .then(utils.spreadLists)
+                .then(resolve);
+        });
+    };
+}
+
+function filterConnectorsByCriteria(criteriaObject) {
+    return function(connectors) {
+        return new Promise(function(resolve) {
+            var list = [];
+            connectors.forEach(function(connector) {
+                if (isGreaterConnector(connector, criteriaObject)) {
+                    list.push(connector);
+                }
+            });
+
+            return Promise.all(list)
+                .then(resolve);
+        });
+    };
+}
+
+function matchUsersAndConnectorsCurry(users) {
+    return function(connectors) {
+        return matchUsersAndConnectors(users, connectors);
+    };
+}
+
+function isGreaterConnector(connector, criteriaObject) {
+    for (var field in criteriaObject) {
+        if (connector[field] < criteriaObject[field]) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+//
+// =====================================================================================
+
+function getSearchSetForTags(tags, headers, fullSearch) {
+    var promises = [];
+    tags.forEach(function(tag) {
+        promises.push(cacheHandler.getFromTagObjectCache(tag.toLowerCase())
+            .then(getSearchSet(headers, tag.toLowerCase(), fullSearch)));
+    });
+
+    return Promise.all(promises);
+}
+
+function getSearchSet(headers, tagName, fullSearch) {
+    return function(tagList) {
+        return new Promise(function(resolve) {
+            if (!tagList) {
                 return resolve([]);
             }
 
             var searchResult = [];
-
-            for (var collectionId in tag) {
-                if (tag.hasOwnProperty(collectionId)) {
-                    searchResult.push(getResultsForTag(tag, collectionId, tagName, headers)
-                        .then(utils.spreadLists));
+            tagList.forEach(function(tag) {
+                for (var collectionId in tag) {
+                    if (tag.hasOwnProperty(collectionId)) {
+                        searchResult.push(getResultsForTag(tag, collectionId, tagName, headers, fullSearch)
+                            .then(utils.spreadLists));
+                    }
                 }
-            }
+            })
 
             return Promise.all(searchResult)
                 .then(utils.spreadLists)
@@ -162,11 +253,11 @@ function getSearchSet(headers, tagName) {
 
 // SWITCH
 // ============================================================================
-function getResultsForTag(tag, collectionId, tagName, headers) {
+function getResultsForTag(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         switch (collectionId) {
             case 'COLLECTION_ASSIGNMENT':
-                return resolve(handleCollectionAssignment(tag, collectionId, tagName, headers));
+                return resolve(handleCollectionAssignment(tag, collectionId, tagName, headers, fullSearch));
 
             case 'COLLECTION_ATTRIBUTE':
                 return resolve([]);
@@ -175,34 +266,19 @@ function getResultsForTag(tag, collectionId, tagName, headers) {
                 return resolve([]);
 
             case 'COLLECTION_OFFICE':
-                return resolve(handleCollectionOffice(tag, collectionId, tagName, headers));
+                return resolve(handleCollectionOffice(tag, collectionId, tagName, headers, fullSearch));
 
             case 'COLLECTION_ROLE':
-                return resolve(handleCollectionRole(tag, collectionId, tagName, headers));
-
-            case 'COLLECTION_ROLETOATTRIBUTE':
-                return resolve([]);
+                return resolve(handleCollectionRole(tag, collectionId, tagName, headers, fullSearch));
 
             case 'COLLECTION_SKILL':
-                return resolve(handleCollectionSkill(tag, collectionId, tagName, headers));
+                return resolve(handleCollectionSkill(tag, collectionId, tagName, headers, fullSearch));
 
             case 'COLLECTION_SKILLGROUP':
                 return resolve([]);
 
-            case 'COLLECTION_SKILLTOSKILLGROUP':
-                return resolve([]);
-
             case 'COLLECTION_USER':
-                return resolve(handleCollectionUser(tag, collectionId, tagName, headers));
-
-            case 'COLLECTION_USERTOASSIGNMENT':
-                return resolve([]);
-
-            case 'COLLECTION_USERTOOFFICE':
-                return resolve([]);
-
-            case 'COLLECTION_USERTOSKILL':
-                return resolve(handleCollectionUserToSkill(tag, collectionId, tagName, headers, acceptedSkills));
+                return resolve(handleCollectionUser(tag, collectionId, tagName, headers, fullSearch));
         }
     });
 }
@@ -210,14 +286,7 @@ function getResultsForTag(tag, collectionId, tagName, headers) {
 // HANDLING
 // ===========================================================================================
 
-function handleCollectionUserToSkill(tag, collectionId, tagName, headers, acceptedSkills) {
-    return getAllGreaterIds(tagName, tag[collectionId])
-        .map(function(id) {
-            return getUserAndSkillFromConnector(headers, id, acceptedSkills);
-        });
-}
-
-function handleCollectionUser(tag, collectionId, tagName, headers) {
+function handleCollectionUser(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         var list = [];
         tag[collectionId].forEach(function(id) {
@@ -229,12 +298,14 @@ function handleCollectionUser(tag, collectionId, tagName, headers) {
     });
 }
 
-function handleCollectionSkill(tag, collectionId, tagName, headers) {
+function handleCollectionSkill(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         var list = [];
         tag[collectionId].forEach(function(id) {
             list.push(getUsersForSkill(headers, tagName, id));
-            list.push(getSkillById(headers, id));
+            if (fullSearch) {
+                list.push(getSkillById(headers, id));
+            }
         });
 
         return Promise.all(list)
@@ -242,7 +313,7 @@ function handleCollectionSkill(tag, collectionId, tagName, headers) {
     });
 }
 
-function handleCollectionRole(tag, collectionId, tagName, headers) {
+function handleCollectionRole(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         var list = [];
         list.push(getUsersForRole(headers, tagName));
@@ -253,12 +324,14 @@ function handleCollectionRole(tag, collectionId, tagName, headers) {
     });
 }
 
-function handleCollectionOffice(tag, collectionId, tagName, headers) {
+function handleCollectionOffice(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         var list = [];
         tag[collectionId].forEach(function(id) {
             list.push(getUsersForOffice(headers, tagName, id));
-            list.push(getOfficeById(headers, id));
+            if (fullSearch) {
+                list.push(getOfficeById(headers, id));
+            }
         });
 
         return Promise.all(list)
@@ -266,12 +339,14 @@ function handleCollectionOffice(tag, collectionId, tagName, headers) {
     });
 }
 
-function handleCollectionAssignment(tag, collectionId, tagName, headers) {
+function handleCollectionAssignment(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
         var list = [];
         tag[collectionId].forEach(function(id) {
             list.push(getUsersForAssignment(headers, tagName, id));
-            list.push(getAssignmentById(headers, id));
+            if (fullSearch) {
+                list.push(getAssignmentById(headers, id));
+            }
         });
 
         return Promise.all(list)
@@ -364,26 +439,6 @@ function getOfficeById(headers, id) {
     return Promise.all(list);
 }
 
-// USERTOSKILLCONNECTOR
-// ==========================================================================================
-
-function getUserAndSkillFromConnector(headers, id, acceptedSkills) {
-    var list = [];
-
-    return userToSkillResource.getUserToSkillConnectorById(id, headers)
-        .then(function(connector) {
-            if (acceptedSkills.length <= 0 || acceptedSkills.indexOf(connector.skillId) >= 0) {
-                list.push(userResource.getUserById(connector.userId, headers)
-                    .then(utils.setUrl(config.UI_URL + '/profile/')));
-
-                list.push(skillResource.getSkillById(connector.skillId, headers)
-                    .then(utils.setUrl(config.UI_URL + '/skill/')));
-            }
-
-            return Promise.all(list);
-        });
-}
-
 // MATCHING
 // ===========================================================================================
 
@@ -407,46 +462,5 @@ function matchUsersAndConnectors(users, connectors) {
         return utils.extractPropertiesFromConnectors('userId', connectors, [])
             .then(utils.matchListAndObjectIds(users))
             .then(resolve);
-    });
-}
-
-// HELPERS
-// ===========================================================================================
-
-function getAcceptedSkills(queryTags) {
-    return function(allTags) {
-        return new Promise(function(resolve) {
-            acceptedSkills = [];
-            queryTags.forEach(function(queryTag) {
-                queryTag = queryTag.toLowerCase();
-                if (allTags[queryTag]) {
-                    for (var collectionId in allTags[queryTag]) {
-                        if (collectionId === 'COLLECTION_SKILL') {
-                            acceptedSkills = acceptedSkills.concat(allTags[queryTag][collectionId]);
-                        }
-                    }
-                }
-            });
-
-            return resolve();
-        });
-    };
-}
-
-function getAllGreaterIds(tagName, backUp) {
-    return new Promise(function(resolve) {
-        var levelRegex = new RegExp(/^level: [0-9]+$/i);
-        var yearsRegex = new RegExp(/^years: [0-9]+$/i);
-
-        if (tagName.match(levelRegex)) {
-            return cacheHandler.GetGreaterIds(tagName, levelRegex, 'COLLECTION_USERTOSKILL')
-                .then(resolve);
-
-        } else if (tagName.match(yearsRegex)) {
-            return cacheHandler.GetGreaterIds(tagName, yearsRegex, 'COLLECTION_USERTOSKILL')
-                .then(resolve);
-        } else {
-            return resolve(backUp);
-        }
     });
 }

@@ -14,7 +14,7 @@ exports.getRoleByName = function(name, headers) {
         method: 'GET',
         headers: headers
     };
-    
+
     return request(options)
         .then(responseHandler.parseGet)
         .catch(errorHandler.throwDREAMSHttpError);

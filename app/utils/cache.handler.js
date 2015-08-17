@@ -8,7 +8,7 @@ var NodeCache = require('node-cache');
 var utils = require('./utils');
 
 // Cache
-var tagObjectCache = new NodeCache({stdTTL: 500, useClones: false});
+var tagObjectCache = new NodeCache({stdTTL: 0, useClones: false});
 
 exports.setToTagObjectCache = function(tag, object) {
     return tagObjectCache.set(tag, object);
@@ -16,7 +16,21 @@ exports.setToTagObjectCache = function(tag, object) {
 
 exports.getFromTagObjectCache = function(tag) {
     return new Promise(function(resolve) {
-        return resolve(tagObjectCache.get(tag));
+        var list = [];
+        return exports.getFullTagObjectCache()
+            .then(function(fullCache) {
+                return new Promise(function(resolve) {
+                    for (var cacheTag in fullCache) {
+                        if (fullCache.hasOwnProperty(cacheTag)) {
+                            if (cacheTag.toLowerCase().search(tag) >= 0) {
+                                list.push(fullCache[cacheTag]);
+                            }
+                        }
+                    }
+                    return resolve(list);
+                });
+            })
+            .then(resolve);
     });
 };
 
@@ -54,28 +68,3 @@ exports.getFullTagObjectCache = function() {
         });
     });
 };
-
-exports.GetGreaterIds = function(tagName, regex, collectionId) {
-    return new Promise(function(resolve) {
-        var list = [];
-        var currentNumber = parseInt(tagName.substring(7, tagName.length));
-        exports.getFullTagObjectCache()
-            .then(function(fullCache) {
-                return new Promise(function(resolve) {
-                    for (var tag in fullCache) {
-                        if (fullCache.hasOwnProperty(tag)) {
-                            if (tag.match(regex)) {
-                                if (tag.substring(7, tag.length) >= currentNumber) {
-                                    list = list.concat(fullCache[tag][collectionId]);
-                                }
-                            }
-                        }
-                    }
-
-                    return resolve(list);
-                });
-            })
-            .then(resolve);
-    });
-};
-
