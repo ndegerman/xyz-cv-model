@@ -3,7 +3,7 @@ XYZ CV API
 
 ## What?
 
-This is a REST API server, representing the data model for xyz-cv-ui, built using ExpressJS.
+This is a REST API server, representing the data model for xyz-cv-ui, built using ExpressJS and Bluebird.
 
 ## Getting started
 
