@@ -57,4 +57,4 @@ Get the profile for the given userId.
 
 TODO
 
-PROMISES ETC
+PROMISES ETC.
