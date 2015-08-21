@@ -9,6 +9,10 @@ var utils = require('./utils');
 
 // Cache
 var tagObjectCache = new NodeCache({stdTTL: 0, useClones: false});
+var userOfficeCache = new NodeCache({stdTTL: 0});
+
+// TAGOBJECT CACHE
+// =================================================================================
 
 exports.setToTagObjectCache = function(tag, object) {
     return tagObjectCache.set(tag, object);
@@ -27,6 +31,7 @@ exports.getFromTagObjectCache = function(tag) {
                             }
                         }
                     }
+
                     return resolve(list);
                 });
             })
@@ -67,4 +72,21 @@ exports.getFullTagObjectCache = function() {
             }
         });
     });
+};
+
+// USEROFFICE CACHE
+// ==========================================================================================
+
+exports.setToUserOfficeCache = function(userId, office) {
+    return userOfficeCache.set(userId, office);
+};
+
+exports.getFromUserOfficeCache = function(userId) {
+    return new Promise(function(resolve) {
+        return resolve(userOfficeCache.get(userId));
+    });
+};
+
+exports.clearUserOfficeCache = function() {
+    return userOfficeCache.flushAll();
 };

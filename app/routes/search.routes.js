@@ -21,6 +21,9 @@ module.exports = function(routes) {
         var query = JSON.parse(request.query.parameters);
         searchModel.getObjectsForTags(request.headers, query.tags)
             .then(searchModel.filterBySkills(request.headers, query.refinedSkills))
+            .then(searchModel.filterByRoles(query.refinedRoles))
+            .then(searchModel.filterByOffices(request.headers, query.refinedOffices))
+            .then(searchModel.filterByAssignments(request.headers, query.refinedAssignments))
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });

@@ -44,7 +44,8 @@ function loadTagList(headers) {
             .then(loadRoles(headers))
             .then(loadAssignments(headers))
             .then(utils.convertSetToList)
-            .then(utils.setFieldForObject(model, 'tagList'));
+            .then(utils.setFieldForObject(model, 'tagList'))
+            .then(fillUserOfficeCache(headers));
     };
 }
 
@@ -81,6 +82,71 @@ function loadAssignments(headers) {
     };
 }
 
+// FILL USEROFFICE CACHE
+// =====================================================================
+
+function fillUserOfficeCache(headers) {
+    return function(tagSet) {
+        return new Promise(function(resolve) {
+            return setUserOfficeCache(headers)
+                .then(function() {
+                    return resolve(tagSet);
+                });
+        });
+    };
+}
+
+function setUserOfficeCache(headers) {
+    var offices = officeResource.getAllOffices(headers);
+    var connectors = userToOfficeResource.getAllUserToOfficeConnectors(headers);
+    var users = userResource.getAllUsers(headers);
+
+    return Promise.all([offices, connectors, users])
+        .then(function() {
+            return Promise.map(users.value(), function(user) {
+                return getOfficeIdForUser(user, connectors.value())
+                    .then(getOfficeNameById(offices.value()))
+                    .then(function(officeName) {
+                        return cacheHandler.setToUserOfficeCache(user._id, officeName);
+                    });
+            });
+        });
+}
+
+function getOfficeIdForUser(user, connectors) {
+    return new Promise(function(resolve) {
+        var officeId = null;
+        connectors.some(function(connector) {
+            if (connector.userId === user._id) {
+                officeId = connector.officeId;
+                return true;
+            }
+        });
+
+        return resolve(officeId);
+    });
+}
+
+function getOfficeNameById(offices) {
+    return function(id) {
+        return new Promise(function(resolve) {
+            var name = null;
+            if (id === null) {
+                return resolve(name);
+            } else {
+                offices.some(function(office) {
+                    if (office._id === id) {
+                        name = office.name;
+                        return true;
+                    }
+                });
+
+                return resolve(name);
+            }
+        });
+    };
+}
+
 // RETRIEVING BY TAGS
 // ===============================================================================
 
@@ -109,51 +175,144 @@ exports.getObjectsForTag = function(headers, tag) {
     });
 };
 
-exports.getProfilesForUsers = function(headers) {
-    return function(users) {
-        return new Promise(function(resolve) {
-            var list = [];
-            users.forEach(function(user) {
-                list.push(profileModel.getProfileModelByUserId(user._id, headers));
-            })
-
-            return Promise.all(list)
-                .then(resolve);
-        });
-    };
-};
+// FILTER BY SKILLS
+// =================================================================================
 
 exports.filterBySkills = function(headers, refinedList) {
     return function(users) {
         return new Promise(function(resolve) {
-            if (!refinedList || refinedList.length === 0) {
+            if (!refinedList || refinedList.length === 0 || refinedList[0].name === '') {
                 return resolve(users);
             } else {
-                return resolve(filterUsersBySkill(headers, users, refinedList, 0));
+                return resolve(filterUsersBySkill(headers, refinedList, 0)(users));
             }
         });
     };
 };
 
-function filterUsersBySkill(headers, users, refinedList, index) {
-    return new Promise(function(resolve) {
-        if (refinedList.length <= index) {
-            return resolve(users);
-        } else {
-            var currentSkill = refinedList[index];
-            cacheHandler.getFromTagObjectCache(currentSkill.name.toLowerCase())
-                .then(getConnectorsForSkillObject(headers))
-                .then(filterConnectorsByCriteria({level: currentSkill.level, years: currentSkill.years}))
-                .then(matchUsersAndConnectorsCurry(users))
-                .then(filterUsersBySkill(headers, users, refinedList, index + 1))
-                .then(resolve);
-        }
+function filterUsersBySkill(headers, refinedList, index) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (refinedList.length <= index) {
+                return resolve(users);
+            } else {
+                var currentSkill = refinedList[index];
+                return cacheHandler.getFromTagObjectCache(currentSkill.name.toLowerCase())
+                    .then(getConnectorsForSkillObject(headers))
+                    .then(filterConnectorsByCriteria({level: currentSkill.level, years: currentSkill.years}))
+                    .then(matchUsersAndConnectorsCurry(users))
+                    .then(filterUsersBySkill(headers, refinedList, index + 1))
+                    .then(resolve)
+                    .catch(function() {
+                        return resolve([]);
+                    });
+            }
+        });
+    };
+}
+
+// FILTER BY  ROLES
+// ====================================================================================
+
+exports.filterByRoles = function(refinedRole) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (!refinedRole || refinedRole.length === 0) {
+                return resolve(users);
+            } else {
+                var list = [];
+                users.forEach(function(user) {
+                    if (user.role === refinedRole) {
+                        list.push(user);
+                    }
+                });
+
+                return resolve(list);
+            }
+        });
+    };
+};
+
+// FILTER BY OFFICES
+// =========================================================================================
+
+exports.filterByOffices = function(headers, refinedOffices) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (!refinedOffices || refinedOffices.length === 0) {
+                return setOfficesOnUsers(users)
+                    .then(resolve);
+            } else {
+                return resolve(filterUsersByOffices(users, headers, refinedOffices));
+            }
+        });
+    };
+};
+
+function setOfficesOnUsers(users) {
+    return Promise.map(users, function(user) {
+        return cacheHandler.getFromUserOfficeCache(user._id)
+            .then(function(officeName) {
+                return new Promise(function(resolve) {
+                    user.office = officeName;
+                    return resolve(user);
+                });
+            });
     });
 }
+
+function filterUsersByOffices(users, headers, refinedOffices) {
+    return setOfficesOnUsers(users)
+        .filter(function(user) {
+            if (!user.office || refinedOffices.indexOf(user.office) <= -1) {
+                return false;
+            }
+
+            return true;
+        });
+}
+
+// FILTER BY ASSIGNMENTS
+// ============================================================================================
+
+exports.filterByAssignments = function(headers, refinedAssignments) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (!refinedAssignments || refinedAssignments.length === 0) {
+                return resolve(users);
+            } else {
+                return resolve(filterUsersByAssignments(headers, refinedAssignments, 0)(users));
+            }
+        });
+    };
+};
+
+function filterUsersByAssignments(headers, refinedAssignments, index) {
+    return function(users) {
+        return new Promise(function(resolve) {
+            if (refinedAssignments.length <= index) {
+                return resolve(users);
+            } else {
+                var currentAssignment = refinedAssignments[index];
+                return userToAssignmentResource.getUserToAssignmentConnectorsByAssignmentId(currentAssignment, headers)
+                    .then(matchUsersAndConnectorsCurry(users))
+                    .then(filterUsersByAssignments(headers, refinedAssignments, index + 1))
+                    .then(resolve);
+            }
+        });
+    };
+}
+
+//
+// ============================================================================================
 
 function getConnectorsForSkillObject(headers) {
     return function(skillObject) {
         return new Promise(function(resolve, reject) {
+            if (!skillObject || skillObject.length === 0) {
+                return reject();
+            }
+
             var connectors = [];
             var list = [];
             skillObject.forEach(function(collectionIdObject) {
@@ -173,7 +332,7 @@ function getConnectorsForSkillObject(headers) {
 
             list.forEach(function(id) {
                 connectors.push(userToSkillResource.getUserToSkillConnectorsBySkillId(id, headers));
-            })
+            });
 
             return Promise.all(connectors)
                 .then(utils.spreadLists)
@@ -212,7 +371,7 @@ function isGreaterConnector(connector, criteriaObject) {
     }
 
     return true;
-};
+}
 
 //
 // =====================================================================================
@@ -242,7 +401,7 @@ function getSearchSet(headers, tagName, fullSearch) {
                             .then(utils.spreadLists));
                     }
                 }
-            })
+            });
 
             return Promise.all(searchResult)
                 .then(utils.spreadLists)
