@@ -1,6 +1,8 @@
 'use strict';
 
 var Promise = require('bluebird');
+var cacheHandler = require('./cache.handler');
+var _ = require('underscore');
 
 exports.extractPropertiesFromConnectors = function(property, connectors, extraProps) {
     return new Promise(function(resolve) {
@@ -94,8 +96,112 @@ exports.setFieldForObject = function(object, fieldName) {
     };
 };
 
+exports.addFieldsFromObjects = function(set, fields, collectionId) {
+    return function(objects) {
+        return new Promise(function(resolve) {
+            objects.forEach(function(object) {
+                fields.forEach(function(field) {
+                    if (object[field]) {
+                        set[object[field]] = true;
+                        var  objectForCache = {};
+                        objectForCache[collectionId] = [object._id];
+                        cacheHandler.softsetToTagObjectCache(object[field], objectForCache);
+                    }
+                });
+            });
+
+            return resolve(set);
+        });
+    };
+};
+
+exports.convertSetToList = function(set) {
+    return new Promise(function(resolve) {
+        var list = [];
+        for (var element in set) {
+            list.push(element);
+        }
+
+        return resolve(list);
+    });
+};
+
+exports.uniq = function(array) {
+    var seen = {};
+    return array.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+};
+
+exports.setUrls = function(url) {
+    return function(objects) {
+        return new Promise(function(resolve) {
+            objects.forEach(function(object) {
+                object.url = url + object._id;
+            });
+
+            return resolve(objects);
+        });
+    };
+};
+
+exports.setUrl = function(url) {
+    return function(object) {
+        return new Promise(function(resolve) {
+            object.url = url + object._id;
+            return resolve(object);
+        });
+    };
+};
+
+function intersectionObjects2(a, b, areEqualFunction) {
+    var results = [];
+
+    for (var i = 0; i < a.length; i++) {
+        var aElement = a[i];
+        var existsInB = _.any(b, function(bElement) {
+            return areEqualFunction(bElement, aElement);
+        });
+
+        if (existsInB) {
+            results.push(aElement);
+        }
+    }
+
+    return results;
+}
+
+exports.intersectionObjects = function(lists) {
+    return new Promise(function(resolve) {
+        var results = lists[0];
+        var lastArgument = lists[lists.length - 1];
+        var arrayCount = lists.length;
+        var areEqualFunction = equalFunction;
+
+        for (var i = 1; i < arrayCount ; i++) {
+            var array = lists[i];
+            results = intersectionObjects2(results, array, areEqualFunction);
+            if (results.length === 0) {
+                break;
+            }
+        }
+
+        return resolve(results);
+    });
+};
+
+exports.spreadLists = function(lists) {
+    return new Promise(function(resolve, reject) {
+        return resolve([].concat.apply([], lists));
+    });
+};
+
 // HELPER
 // ============================================================================
+
+function equalFunction(item1, item2) {
+    return item1._id === item2._id;
+}
 
 function listContainsId(list, id) {
     return list.indexOf(id) > -1;
@@ -112,4 +218,3 @@ function mergeProperties(from, to) {
         return resolve(to);
     });
 }
-
