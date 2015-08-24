@@ -26,7 +26,7 @@ exports.getFromTagObjectCache = function(tag) {
                 return new Promise(function(resolve) {
                     for (var cacheTag in fullCache) {
                         if (fullCache.hasOwnProperty(cacheTag)) {
-                            if (cacheTag.toLowerCase().search(tag) >= 0) {
+                            if (cacheTag.toLowerCase() === tag.toLowerCase()) {
                                 list.push(fullCache[cacheTag]);
                             }
                         }
