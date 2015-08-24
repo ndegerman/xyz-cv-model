@@ -83,7 +83,7 @@ function loadAssignments(headers) {
 }
 
 // FILL USEROFFICE CACHE
-// =====================================================================
+// ============================================================================
 
 function fillUserOfficeCache(headers) {
     return function(tagSet) {
@@ -148,7 +148,7 @@ function getOfficeNameById(offices) {
 }
 
 // RETRIEVING BY TAGS
-// ===============================================================================
+// ============================================================================
 
 exports.getObjectsForTags = function(headers, tags, fullSearch) {
     return new Promise(function(resolve, reject) {
@@ -176,7 +176,7 @@ exports.getObjectsForTag = function(headers, tag) {
 };
 
 // FILTER BY SKILLS
-// =================================================================================
+// ============================================================================
 
 exports.filterBySkills = function(headers, refinedList) {
     return function(users) {
@@ -212,7 +212,7 @@ function filterUsersBySkill(headers, refinedList, index) {
 }
 
 // FILTER BY  ROLES
-// ====================================================================================
+// ============================================================================
 
 exports.filterByRoles = function(refinedRole) {
     return function(users) {
@@ -234,7 +234,7 @@ exports.filterByRoles = function(refinedRole) {
 };
 
 // FILTER BY OFFICES
-// =========================================================================================
+// ============================================================================
 
 exports.filterByOffices = function(headers, refinedOffices) {
     return function(users) {
@@ -273,7 +273,7 @@ function filterUsersByOffices(users, headers, refinedOffices) {
 }
 
 // FILTER BY ASSIGNMENTS
-// ============================================================================================
+// ============================================================================
 
 exports.filterByAssignments = function(headers, refinedAssignments) {
     return function(users) {
@@ -304,7 +304,7 @@ function filterUsersByAssignments(headers, refinedAssignments, index) {
 }
 
 //
-// ============================================================================================
+// ============================================================================
 
 function getConnectorsForSkillObject(headers) {
     return function(skillObject) {
@@ -374,7 +374,7 @@ function isGreaterConnector(connector, criteriaObject) {
 }
 
 //
-// =====================================================================================
+// ============================================================================
 
 function getSearchSetForTags(tags, headers, fullSearch) {
     var promises = [];
@@ -443,7 +443,7 @@ function getResultsForTag(tag, collectionId, tagName, headers, fullSearch) {
 }
 
 // HANDLING
-// ===========================================================================================
+// ============================================================================
 
 function handleCollectionUser(tag, collectionId, tagName, headers, fullSearch) {
     return new Promise(function(resolve) {
@@ -514,7 +514,7 @@ function handleCollectionAssignment(tag, collectionId, tagName, headers, fullSea
 }
 
 // GET USERS FOR ...
-// ==============================================================================
+// ============================================================================
 
 function getUsersForSkill(headers, tagName, id) {
     var connectors = skillResource.getSkillById(id, headers)
@@ -575,7 +575,7 @@ function getUserById(headers, id) {
 }
 
 // GET BY ID
-// ==========================================================================================
+// ============================================================================
 
 function getSkillById(headers, id) {
     var list = [];
@@ -599,7 +599,7 @@ function getOfficeById(headers, id) {
 }
 
 // MATCHING
-// ===========================================================================================
+// ============================================================================
 
 function matchUsersAndRole(role) {
     return function(users) {
