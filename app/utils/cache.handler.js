@@ -8,8 +8,8 @@ var NodeCache = require('node-cache');
 var utils = require('./utils');
 
 // Cache
-var tagObjectCache = new NodeCache({stdTTL: 0, useClones: false});
-var userOfficeCache = new NodeCache({stdTTL: 0});
+var tagObjectCache = new NodeCache({stdTTL: 600, useClones: false});
+var userOfficeCache = new NodeCache({stdTTL: 600});
 
 // TAGOBJECT CACHE
 // =================================================================================
