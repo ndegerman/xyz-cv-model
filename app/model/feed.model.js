@@ -71,8 +71,8 @@ function loadUsers(users, skills, headers) {
             .then(loadSkillsForUsers(skills))
             .then(loadOfficeForUsers(headers))
             .then(loadProfileImageForUsers(headers))
-            .then(utils.setFieldForObject(latest, 'users'))
-    }
+            .then(utils.setFieldForObject(latest, 'users'));
+    };
 }
 
 function setRealUpdatedAt(users) {
@@ -88,14 +88,15 @@ function setRealUpdatedAt(users) {
                     if (diff > 0) {
                         userMap[connector.userId].updatedAt = connector.updatedAt;
                     }
-                    userMap[connector.userId].skills.push(connector)
+
+                    userMap[connector.userId].skills.push(connector);
                 });
             }).then(function() {
-                return Promise.map(Object.keys(userMap), function(key) {return userMap[key]});
+                return Promise.map(Object.keys(userMap), function(key) {return userMap[key];});
             })
-            .then(resolve)
+            .then(resolve);
         });
-    }
+    };
 }
 
 // USER IMAGE
@@ -103,8 +104,8 @@ function setRealUpdatedAt(users) {
 
 function loadProfileImageForUsers(headers) {
     return function(users) {
-        return Promise.map(users, loadProfileImageForUser(headers))
-    }
+        return Promise.map(users, loadProfileImageForUser(headers));
+    };
 }
 
 function loadProfileImageForUser(headers) {
@@ -130,27 +131,28 @@ function loadSkillsForUsers(skills) {
             var skillMap = Object.create(null);
             skills.forEach(function(skill) {
                 skillMap[skill._id] = skill;
-            })
+            });
+
             return Promise.map(users, function(user) {
                 return extractXBestSkills(user, 5, skillMap)
                     .then(utils.setFieldForObject(user, 'skills'));
             })
             .then(resolve);
-        })
-    }
+        });
+    };
 }
 
 function extractXBestSkills(user, num, skillMap) {
     return new Promise(function(resolve) {
         var connectors = user.skills.sort(function(a, b) {
-            return b.level - a.level
+            return b.level - a.level;
         }).splice(0, num);
         return Promise.map(connectors, function(connector) {
             connector.name = skillMap[connector.skillId].name;
             connector.icon = skillMap[connector.skillId].icon;
             return connector;
         }).then(resolve);
-    })
+    });
 }
 
 // USER OFFICE
@@ -159,7 +161,7 @@ function extractXBestSkills(user, num, skillMap) {
 function loadOfficeForUsers(headers) {
     return function(users) {
         return Promise.map(users, loadOfficeForUser(headers));
-    }
+    };
 }
 
 function loadOfficeForUser(headers) {
@@ -182,8 +184,9 @@ function takeXLatestElements(num) {
         return new Promise(function(resolve) {
             list.sort(function(a, b) {
                 return new Date(b.updatedAt) - new Date(a.updatedAt);
-            })
+            });
+
             return resolve(list.splice(0, num));
-        })
-    }
+        });
+    };
 }
