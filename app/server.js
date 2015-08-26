@@ -11,7 +11,8 @@ var profileRoutes = require('./routes/profile.routes')(express.Router());
 var officeRoutes = require('./routes/office.routes')(express.Router());
 var searchRoutes = require('./routes/search.routes')(express.Router());
 var peopleRoutes = require('./routes/people.routes')(express.Router());
-var competenceRoutes = require('./routes/competence.routes')(express.Router());
+var feedRoutes = require('./routes/feed.routes')(express.Router());
+var dashboardRoutes = require('./routes/dashboard.routes')(express.Router());
 
 var errorMiddleware = require('./middleware/error.middleware');
 var authenticationMiddleware = require('./middleware/authentication.middleware');
@@ -48,7 +49,8 @@ app.use('/profile', profileRoutes);
 app.use('/office', officeRoutes);
 app.use('/search', searchRoutes);
 app.use('/people', peopleRoutes);
-app.use('/competence', competenceRoutes);
+app.use('/feed', feedRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 app.use(errorMiddleware.errorFilter);
 

@@ -7,8 +7,8 @@ var userToSkillConnector = require('../resource/userToSkillConnector.resource');
 var userToOfficeConnector = require('../resource/userToOfficeConnector.resource');
 var Promise = require('bluebird');
 
-exports.getCompetenceModel = function(headers) {
-    return getCompetenceTemplate()
+exports.getDashboardModel = function(headers) {
+    return getDashboardTemplate()
         .then(setCompetence(headers))
         .then(setOfficeNames(headers));
 };
@@ -30,7 +30,7 @@ function setOfficeNames(headers) {
     };
 }
 
-function getCompetenceTemplate(users) {
+function getDashboardTemplate(users) {
     return new Promise(function(resolve) {
         var template = {
             competence: [],

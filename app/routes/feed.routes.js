@@ -3,15 +3,14 @@
 /**
  * Module dependencies.
  */
-
-var competenceModel = require('../model/competence.model');
+var feedModel = require('../model/feed.model');
 var responseHandler = require('../utils/response.handler');
 
 module.exports = function(routes) {
 
-    // get competence for all people
+    // get dashboard model
     routes.get('/', function(request, response) {
-        competenceModel.getCompetenceModel(request.headers)
+        feedModel.getFeedModel(request.headers)
             .then(responseHandler.sendJsonResponse(response))
             .catch(responseHandler.sendErrorResponse(response));
     });
