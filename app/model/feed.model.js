@@ -56,7 +56,7 @@ function loadLatest(users, skills, headers) {
 
 function loadSkills(skills, latest, headers) {
     return skillResource.getAllSkills(headers)
-        .then(takeXLatestElements(6))
+        .then(takeXLatestElements(10))
         .then(utils.setFieldForObject(latest, 'skills'));
 }
 
