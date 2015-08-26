@@ -84,6 +84,10 @@ function setRealUpdatedAt(users) {
                 userMap[user._id] = user;
             }).then(function() {
                 return Promise.each(connectors, function(connector) {
+                    if(!userMap[connector.userId]){
+                        // TODO: connector but no user..
+                        return;
+                    }
                     var diff = new Date(connector.updatedAt) - new Date(userMap[connector.userId].updatedAt);
                     if (diff > 0) {
                         userMap[connector.userId].updatedAt = connector.updatedAt;

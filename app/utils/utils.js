@@ -196,6 +196,15 @@ exports.spreadLists = function(lists) {
     });
 };
 
+exports.logThen = function(phrase) {
+    return function(value) {
+        return new Promise(function(resolve) {
+            console.log(phrase);
+            return resolve(value);
+        })
+    }
+}
+
 // HELPER
 // ============================================================================
 
