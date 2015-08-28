@@ -13,7 +13,8 @@ exports.getSkillById = function(id, headers) {
         uri: url + '/' + id,
         method: 'GET',
         json: true,
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -26,7 +27,8 @@ exports.getAllSkills = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -39,7 +41,8 @@ exports.getSkillByName = function(name, headers) {
         resolveWithFullResponse: true,
         uri: url + '/query?name=' + name,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

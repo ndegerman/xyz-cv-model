@@ -12,7 +12,8 @@ exports.getAllPeople = function(headers) {
         resolveWithFullResponse: true,
         uri: url + '/',
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

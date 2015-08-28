@@ -12,7 +12,8 @@ exports.getRoleByName = function(name, headers) {
         resolveWithFullResponse: true,
         uri: url + '?name=' + name,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -26,7 +27,8 @@ exports.getRoleById = function(id, headers) {
         uri: url + '/' + id,
         method: 'GET',
         json: true,
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -39,7 +41,8 @@ exports.getAllRoles = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
