@@ -12,7 +12,8 @@ exports.getRoleToAttributeConnectorsByAttributeId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?attributeId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -25,7 +26,8 @@ exports.getRoleToAttributeConnectorsByRoleId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?roleId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -38,7 +40,8 @@ exports.getAllRoleToAttributeConnectors = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

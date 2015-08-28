@@ -6,6 +6,7 @@ var request = require('request');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var cors = require('cors');
+var compression = require('compression');
 
 var profileRoutes = require('./routes/profile.routes')(express.Router());
 var officeRoutes = require('./routes/office.routes')(express.Router());
@@ -36,6 +37,9 @@ app.use(bodyParser.json());
 
 // logging
 app.use(morgan('dev'));
+
+// compression
+app.use(compression());
 
 // ROUTES & MIDDLEWARE
 // ============================================================================

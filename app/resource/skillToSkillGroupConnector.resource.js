@@ -12,7 +12,8 @@ exports.getSkillToSkillGroupConnectorsBySkillId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?skillId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -25,7 +26,8 @@ exports.getSkillToSkillGroupConnectorsBySkillGroupId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?skillGroupId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -38,7 +40,8 @@ exports.getAllSkillToSkillGroupConnectors = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

@@ -12,7 +12,8 @@ exports.getUserToOfficeConnectorsByOfficeId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?officeId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -25,7 +26,8 @@ exports.getUserToOfficeConnectorsByUserId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?userId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -38,7 +40,8 @@ exports.getAllUserToOfficeConnectors = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

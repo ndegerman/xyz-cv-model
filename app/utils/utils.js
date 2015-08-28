@@ -205,6 +205,24 @@ exports.logThen = function(phrase) {
     }
 }
 
+exports.timeEndThen = function(label) {
+    return function(value) {
+        return new Promise(function(resolve) {
+            console.timeEnd(label);
+            return resolve(value);
+        })
+    }
+}
+
+exports.timeThen = function(label) {
+    return function(value) {
+        return new Promise(function(resolve) {
+            console.time(label);
+            return resolve(value);
+        })
+    }
+}
+
 // HELPER
 // ============================================================================
 

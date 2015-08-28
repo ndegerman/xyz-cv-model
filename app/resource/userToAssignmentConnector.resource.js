@@ -12,7 +12,8 @@ exports.getUserToAssignmentConnectorsByAssignmentId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?assignmentId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -25,7 +26,8 @@ exports.getUserToAssignmentConnectorsByUserId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?userId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -38,7 +40,8 @@ exports.getAllUserToAssignmentConnectors = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

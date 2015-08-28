@@ -12,7 +12,8 @@ exports.getUserToSkillConnectorsBySkillId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?skillId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -25,7 +26,8 @@ exports.getUserToSkillConnectorsByUserId = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '?userId=' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -38,7 +40,8 @@ exports.getAllUserToSkillConnectors = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -51,7 +54,8 @@ exports.getUserToSkillConnectorById = function(id, headers) {
         resolveWithFullResponse: true,
         uri: url + '/' + id,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)

@@ -13,7 +13,8 @@ exports.getUserById = function(id, headers) {
         uri: url + '/' + id,
         method: 'GET',
         json: true,
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -26,7 +27,8 @@ exports.getCurrentUser = function(headers) {
         resolveWithFullResponse: true,
         uri: url + '/current',
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
@@ -39,7 +41,8 @@ exports.getAllUsers = function(headers) {
         resolveWithFullResponse: true,
         uri: url,
         method: 'GET',
-        headers: headers
+        headers: headers,
+        gzip: true
     };
 
     return request(options)
