@@ -287,7 +287,8 @@ function loadSkillFrequencyMap(skills, currentUserToOfficeConnectors, userToSkil
     return function(view) {
         return new Promise(function(resolve) {
             if (currentUserToOfficeConnectors.length) {
-                return loadOfficeSkillFrequencyMap(skills, currentUserToOfficeConnectors[0], userToSkillConnectors, headers)
+                //return loadOfficeSkillFrequencyMap(skills, currentUserToOfficeConnectors[0], userToSkillConnectors, headers)
+                return loadCompanySkillFrequencyMap(skills, userToSkillConnectors, headers)
                     .then(resolve);
             } else {
                 return loadCompanySkillFrequencyMap(skills, userToSkillConnectors, headers)
