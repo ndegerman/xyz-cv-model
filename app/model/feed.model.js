@@ -302,7 +302,7 @@ function loadOfficeSkillFrequencyMap(skills, currentUserToOfficeConnector, userT
         var userToOfficeConnectors = userToOfficeResource.getUserToOfficeConnectorsByOfficeId(currentUserToOfficeConnector.officeId, headers);
         return Promise.all([userToOfficeConnectors])
             .then(function() {
-                return takeXMostRepresentedSkills(6, skills)
+                return takeXMostRepresentedSkills(7, skills)
                     .then(createSkillFrequencyMap)
                     .then(populateOfficeSkillFrequencyMap(userToOfficeConnectors.value(), userToSkillConnectors));
             });
@@ -312,7 +312,7 @@ function loadCompanySkillFrequencyMap(skills, userToSkillConnectors, headers) {
     var userToOfficeConnectors = userToOfficeResource.getAllUserToOfficeConnectors(headers);
     return Promise.all([userToOfficeConnectors])
         .then(function() {
-            return takeXMostRepresentedSkills(6, skills)
+            return takeXMostRepresentedSkills(7, skills)
                 .then(createSkillFrequencyMap)
                 .then(populateCompanySkillFrequencyMap(userToOfficeConnectors.value(), userToSkillConnectors));
         });
@@ -484,6 +484,9 @@ function takeXMostRepresentedSkills(num, skills) {
                 case 'C':
                     return true;
 
+                case 'C#':
+                    return true;
+
                 case 'Javascript':
                     return true;
 
@@ -492,6 +495,7 @@ function takeXMostRepresentedSkills(num, skills) {
 
                 case 'Ruby':
                     return true;
+
                 default:
                     return false;
             }
