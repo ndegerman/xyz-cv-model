@@ -6,6 +6,8 @@ var roleResource = require('../resource/role.resource');
 var skillResource = require('../resource/skill.resource');
 var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
+var domainResource = require('../resource/domain.resource');
+var customerResource = require('../resource/customer.resource');
 var userToAssignmentResource = require('../resource/userToAssignmentConnector.resource');
 var userToOfficeResource = require('../resource/userToOfficeConnector.resource');
 var attributeResource = require('../resource/attribute.resource');
@@ -123,7 +125,7 @@ function loadAssignmentsForUser(headers) {
         return Promise.all([connectors, assignments])
             .then(function() {
                 return matchAssignmentsAndConnectors(assignments.value(), connectors.value())
-                    .then(loadSkillsForAssignments(headers));
+                    .then(loadAssignmentSubEntities(headers));
             })
             .then(utils.setFieldForObject(user, 'assignments'));
     };
@@ -134,20 +136,55 @@ function matchAssignmentsAndConnectors(assignments, connectors) {
         .then(utils.matchListAndObjectIds(assignments));
 }
 
-function loadSkillsForAssignments(headers) {
+function loadAssignmentSubEntities(headers) {
     return function(assignments) {
-        return skillResource.getAllSkills(headers)
-            .then(function(skills) {
-                var promises = [];
-                assignments.forEach(function(assignment) {
-                    promises.push(utils.matchIdsAndObjects(assignment.skills, skills)
-                        .then(utils.setFieldForObject(assignment, 'skills')));
-                });
+        return new Promise(function(resolve) {
+            var skills = skillResource.getAllSkills(headers);
+            var customers = customerResource.getAllCustomers(headers);
+            var domains = domainResource.getAllDomains(headers);
+            return Promise.all([skills, customers, domains])
+                .then(function(){
+                    skills = skills.value();
+                    customers = customers.value();
+                    domains = domains.value();
+                    return loadSkillsForAssignments(headers, skills)(assignments)
+                        .then(loadCustomerForAssignments(headers, customers))
+                        .then(loadDomainForAssignments(headers, domains))
+                        .then(resolve);
+                })
+        })
+    }
+}
 
-                return Promise.all(promises);
-            });
+function loadSkillsForAssignments(headers, skills) {
+    return function(assignments) {
+        return Promise.each(assignments, function(assignment) {
+            return utils.matchIdsAndObjects(assignment.skills, skills)
+                .then(utils.setFieldForObject(assignment, 'skills'));
+        })
     };
 }
+
+function loadCustomerForAssignments(headers, customers) {
+    return function(assignments) {
+        return Promise.each(assignments, function(assignment) {
+            return utils.matchIdsAndObjects([assignment.customer], customers)
+                .then(utils.extractOneFromItems)
+                .then(utils.setFieldForObject(assignment, 'customer'));
+        });
+    };
+}
+
+function loadDomainForAssignments(headers, domains) {
+    return function(assignments) {
+        return Promise.each(assignments, function(assignment) {
+            return utils.matchIdsAndObjects([assignment.domain], domains)
+                .then(utils.extractOneFromItems)
+                .then(utils.setFieldForObject(assignment, 'domain'));
+        });
+    };
+}
+
 
 // PROFILE IMAGE
 // ============================================================================

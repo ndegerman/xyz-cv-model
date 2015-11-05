@@ -23,6 +23,15 @@ exports.extractPropertiesFromConnectors = function(property, connectors, extraPr
     });
 };
 
+exports.extractOneFromItems = function(items) {
+    return new Promise(function(resolve) {
+        if(items.length) {
+            return resolve(items[0]);
+        }
+        return resolve(null);
+    })
+}
+
 exports.matchListAndObjectIds = function(list) {
     return function(objects) {
         return new Promise(function(resolve) {
