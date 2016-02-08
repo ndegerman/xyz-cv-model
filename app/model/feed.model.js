@@ -208,8 +208,8 @@ function loadMostRepresentedSkillsView(skills, user, userToSkillConnectors, head
                 return loadSkillFrequencyMap(skills, connectors, userToSkillConnectors, headers)({})
                     .then(loadSkillGraphData)
                     .then(utils.setFieldForObject(views, 'mostRepresentedSkillsView'));
-            })
-    }
+            });
+    };
 }
 
 function loadOfficePopulationView(offices, users, headers) {
@@ -217,7 +217,7 @@ function loadOfficePopulationView(offices, users, headers) {
         return loadUserOfficeFrequencyMap(offices, users, headers)({})
             .then(loadOfficeGraphData)
             .then(utils.setFieldForObject(views, 'officePopulationView'));
-    }
+    };
 }
 
 // USER OFFICE FREQUENCY MAP
@@ -252,11 +252,11 @@ function populateUserOfficeFrequencyMap(users, headers) {
                         map[connector.officeId].users++;
                     }
                     if (userMap[connector.userId]) {
-                        delete userMap[connector.userId]
+                        delete userMap[connector.userId];
                     }
                     return map;
                 }, map)
-                .then(setNoOfficeUsers(userMap))
+                .then(setNoOfficeUsers(userMap));
             });
     };
 }
@@ -276,8 +276,8 @@ function setNoOfficeUsers(userMap) {
                 name: 'No Office'
             };
             return resolve(officeMap);
-        })
-    }
+        });
+    };
 }
 
 // SKILL FREQUENCY MAP

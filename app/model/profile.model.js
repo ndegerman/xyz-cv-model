@@ -151,9 +151,9 @@ function loadAssignmentSubEntities(headers) {
                         .then(loadCustomerForAssignments(headers, customers))
                         .then(loadDomainForAssignments(headers, domains))
                         .then(resolve);
-                })
-        })
-    }
+                });
+        });
+    };
 }
 
 function loadSkillsForAssignments(headers, skills) {
@@ -161,7 +161,7 @@ function loadSkillsForAssignments(headers, skills) {
         return Promise.each(assignments, function(assignment) {
             return utils.matchIdsAndObjects(assignment.skills, skills)
                 .then(utils.setFieldForObject(assignment, 'skills'));
-        })
+        });
     };
 }
 
