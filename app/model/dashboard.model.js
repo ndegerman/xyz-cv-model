@@ -81,6 +81,20 @@ function getSkillLevelForUser(userToSkillConnector, userId, skillId) {
     return level;
 }
 
+function getFutureSkillLevelForUser(userToSkillConnector, userId, skillId) {
+    var futureLevel = '';
+
+    for (var i = 0; i < userToSkillConnector.length; i++) {
+        if (userId === userToSkillConnector[i].userId && skillId === userToSkillConnector[i].skillId) {
+            futureLevel = userToSkillConnector[i].futureLevel;
+            break;
+        }
+    }
+
+    return futureLevel;
+}
+
+
 function getListOfUsersWithLevelForSkill(users, connectors, offices, skill, userToOfficeConnectors) {
     var userList = [];
     var userLevel;
