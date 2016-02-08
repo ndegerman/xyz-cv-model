@@ -29,8 +29,8 @@ exports.extractOneFromItems = function(items) {
             return resolve(items[0]);
         }
         return resolve(null);
-    })
-}
+    });
+};
 
 exports.matchListAndObjectIds = function(list) {
     return function(objects) {
@@ -210,27 +210,27 @@ exports.logThen = function(phrase) {
         return new Promise(function(resolve) {
             console.log(phrase);
             return resolve(value);
-        })
-    }
-}
+        });
+    };
+};
 
 exports.timeEndThen = function(label) {
     return function(value) {
         return new Promise(function(resolve) {
             console.timeEnd(label);
             return resolve(value);
-        })
-    }
-}
+        });
+    };
+};
 
 exports.timeThen = function(label) {
     return function(value) {
         return new Promise(function(resolve) {
             console.time(label);
             return resolve(value);
-        })
-    }
-}
+        });
+    };
+};
 
 // HELPER
 // ============================================================================
