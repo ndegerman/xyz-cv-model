@@ -69,16 +69,12 @@ function getOfficeNameForUser(officeConnector, offices, userId) {
 }
 
 function getSkillLevelForUser(userToSkillConnector, userId, skillId) {
-    var level = '';
 
     for (var i = 0; i < userToSkillConnector.length; i++) {
         if (userId === userToSkillConnector[i].userId && skillId === userToSkillConnector[i].skillId) {
-            level = userToSkillConnector[i].level;
-            break;
+            return userToSkillConnector[i].level;
         }
     }
-
-    return level;
 }
 
 function getFutureSkillLevelForUser(userToSkillConnector, userId, skillId) {
