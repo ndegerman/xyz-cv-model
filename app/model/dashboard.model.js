@@ -94,7 +94,6 @@ function getFutureSkillLevelForUser(userToSkillConnector, userId, skillId) {
     return futureLevel;
 }
 
-
 function getListOfUsersWithLevelForSkill(users, connectors, offices, skill, userToOfficeConnectors) {
     var userList = [];
     var userLevel;
