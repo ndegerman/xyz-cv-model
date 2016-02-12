@@ -83,7 +83,7 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'years'])
+    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years'])
         .then(utils.matchListAndObjectIds(skills));
 }
 
@@ -143,7 +143,7 @@ function loadAssignmentSubEntities(headers) {
             var customers = customerResource.getAllCustomers(headers);
             var domains = domainResource.getAllDomains(headers);
             return Promise.all([skills, customers, domains])
-                .then(function(){
+                .then(function() {
                     skills = skills.value();
                     customers = customers.value();
                     domains = domains.value();
@@ -184,7 +184,6 @@ function loadDomainForAssignments(headers, domains) {
         });
     };
 }
-
 
 // PROFILE IMAGE
 // ============================================================================
