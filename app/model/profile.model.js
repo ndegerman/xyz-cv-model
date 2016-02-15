@@ -83,7 +83,7 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'years'])
+    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'years', 'updatedAt'])
         .then(utils.matchListAndObjectIds(skills));
 }
 
@@ -132,7 +132,7 @@ function loadAssignmentsForUser(headers) {
 }
 
 function matchAssignmentsAndConnectors(assignments, connectors) {
-    return utils.extractPropertiesFromConnectors('assignmentId', connectors, ['skills', 'dateFrom', 'dateTo', 'description'])
+    return utils.extractPropertiesFromConnectors('assignmentId', connectors, ['skills', 'dateFrom', 'dateTo', 'description', 'updatedAt'])
         .then(utils.matchListAndObjectIds(assignments));
 }
 
