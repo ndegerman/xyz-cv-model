@@ -7,9 +7,11 @@ var skillResource = require('../resource/skill.resource');
 var languageResource = require('../resource/language.resource');
 var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
+var certificateResource = require('../resource/certificate.resource');
 var domainResource = require('../resource/domain.resource');
 var customerResource = require('../resource/customer.resource');
 var userToAssignmentResource = require('../resource/userToAssignmentConnector.resource');
+var userToCertificateResource = require('../resource/userToCertificateConnector.resource');
 var userToOfficeResource = require('../resource/userToOfficeConnector.resource');
 var attributeResource = require('../resource/attribute.resource');
 var roleToAttributeResource = require('../resource/roleToAttributeConnector.resource');
@@ -51,6 +53,7 @@ function loadUser(id, headers) {
             .then(loadLanguagesForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
+            .then(loadCertificatesForUser(headers))
             .then(loadOfficeForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
@@ -64,6 +67,7 @@ function loadCurrentUser(headers) {
             .then(loadLanguagesForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
+            .then(loadCertificatesForUser(headers))
             .then(loadOfficeForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
@@ -87,7 +91,7 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years'])
+    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years', 'updatedAt'])
         .then(utils.matchListAndObjectIds(skills));
 }
 
@@ -157,7 +161,7 @@ function loadAssignmentsForUser(headers) {
 }
 
 function matchAssignmentsAndConnectors(assignments, connectors) {
-    return utils.extractPropertiesFromConnectors('assignmentId', connectors, ['skills', 'dateFrom', 'dateTo', 'description'])
+    return utils.extractPropertiesFromConnectors('assignmentId', connectors, ['skills', 'dateFrom', 'dateTo', 'description', 'updatedAt'])
         .then(utils.matchListAndObjectIds(assignments));
 }
 
@@ -210,6 +214,76 @@ function loadDomainForAssignments(headers, domains) {
     };
 }
 
+function loadDomainForCertificates(headers, domains) {
+    return function(certificates) {
+        return Promise.each(certificates, function(certificate) {
+            return utils.matchIdsAndObjects([certificate.domain], domains)
+                .then(utils.extractOneFromItems)
+                .then(utils.setFieldForObject(certificate, 'domain'));
+        });
+    };
+}
+
+// Certificates
+// ============================================================================
+
+function loadCertificatesForUser(headers) {
+    return function(user) {
+        var connectors = userToCertificateResource.getUserToCertificateConnectorsByUserId(user._id, headers);
+        var certificates = certificateResource.getAllCertificates(headers);
+        return Promise.all([connectors, certificates])
+            .then(function() {
+                return matchCertificatesAndConnectors(certificates.value(), connectors.value())
+                    .then(loadCertificateSubEntities(headers));
+            })
+            .then(utils.setFieldForObject(user, 'certificates'));
+    };
+}
+
+function matchCertificatesAndConnectors(certificates, connectors) {
+    return utils.extractPropertiesFromConnectors('certificateId', connectors, ['skills', 'dateFrom', 'dateTo', 'description', 'updatedAt'])
+        .then(utils.matchListAndObjectIds(certificates));
+}
+
+function loadCertificateSubEntities(headers) {
+    return function(certificates) {
+        return new Promise(function(resolve) {
+            var skills = skillResource.getAllSkills(headers);
+            var customers = customerResource.getAllCustomers(headers);
+            var domains = domainResource.getAllDomains(headers);
+            return Promise.all([skills, customers, domains])
+                .then(function() {
+                    skills = skills.value();
+                    customers = customers.value();
+                    domains = domains.value();
+                    return loadSkillsForCertificates(headers, skills)(certificates)
+                        .then(loadCustomerForCertificates(headers, customers))
+                        .then(loadDomainForCertificates(headers, domains))
+                        .then(resolve);
+                });
+        });
+    };
+}
+
+function loadSkillsForCertificates(headers, skills) {
+    return function(certificates) {
+        return Promise.each(certificates, function(certificate) {
+            return utils.matchIdsAndObjects(certificate.skills, skills)
+                .then(utils.setFieldForObject(certificate, 'skills'));
+        });
+    };
+}
+
+function loadCustomerForCertificates(headers, customers) {
+    return function(certificates) {
+        return Promise.each(certificates, function(certificate) {
+            return utils.matchIdsAndObjects([certificate.customer], customers)
+                .then(utils.extractOneFromItems)
+                .then(utils.setFieldForObject(certificate, 'customer'));
+        });
+    };
+}
+
 // PROFILE IMAGE
 // ============================================================================
 
@@ -243,6 +317,7 @@ function loadCloudMap(cloud, model) {
     return loadMapSkills(model)({})
         .then(loadMapAssignments(model))
         .then(loadMapGeneralInfo(model))
+        .then(loadMapCertificates(model))
         .then(utils.setFieldForObject(cloud, 'map'));
 }
 
@@ -328,6 +403,37 @@ function loadMapAssignments(model) {
                 word.weight = 1;
                 map[assignment.name] = word;
                 assignment.skills.forEach(function(skill) {
+                    if (map[skill.name]) {
+                        map[skill.name].weight += 1;
+                        return;
+                    }
+
+                    var word = {};
+                    word.text = skill.name;
+                    word.weight = 1;
+                    map[skill.name] = word;
+                });
+            });
+
+            return resolve(map);
+        });
+    };
+}
+
+function loadMapCertificates(model) {
+    return function(map) {
+        return new Promise(function(resolve) {
+            model.user.certificates.forEach(function(certificate) {
+                if (map[certificate.name]) {
+                    map[certificate.name].weight += 1;
+                    return;
+                }
+
+                var word = {};
+                word.text = certificate.name;
+                word.weight = 1;
+                map[certificate.name] = word;
+                certificate.skills.forEach(function(skill) {
                     if (map[skill.name]) {
                         map[skill.name].weight += 1;
                         return;
