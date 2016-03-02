@@ -28,18 +28,6 @@ module.exports = function(routes) {
             .catch(responseHandler.sendErrorResponse(response));
     });
 
-/*
-        routes.get('/updatedList', function(request, response) {
-        var query = JSON.parse(request.query.parameters);
-        searchModel.getObjectsForTags(request.headers, query.tags)
-            .then(searchModel.filterBySkills(request.headers, query.refinedSkills))
-            .then(searchModel.filterByRoles(query.refinedRoles))
-            .then(searchModel.filterByOffices(request.headers, query.refinedOffices))
-            .then(searchModel.filterByAssignments(request.headers, query.refinedAssignments))
-            .then(responseHandler.sendJsonResponse(response))
-            .catch(responseHandler.sendErrorResponse(response));
-    });
-*/
     routes.get('/simpleSearch', function(request, response) {
         searchModel.getObjectsForTag(request.headers, request.query.tag)
             .then(responseHandler.sendJsonResponse(response))
