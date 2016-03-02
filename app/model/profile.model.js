@@ -4,6 +4,7 @@ var officeResource = require('../resource/office.resource');
 var userResource = require('../resource/user.resource');
 var roleResource = require('../resource/role.resource');
 var skillResource = require('../resource/skill.resource');
+var languageResource = require('../resource/language.resource');
 var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
 var domainResource = require('../resource/domain.resource');
@@ -13,6 +14,7 @@ var userToOfficeResource = require('../resource/userToOfficeConnector.resource')
 var attributeResource = require('../resource/attribute.resource');
 var roleToAttributeResource = require('../resource/roleToAttributeConnector.resource');
 var userToSkillResource = require('../resource/userToSkillConnector.resource');
+var userToLanguageResource = require('../resource/userToLanguageConnector.resource');
 var utils = require('../utils/utils');
 
 var Promise = require('bluebird');
@@ -46,6 +48,7 @@ function loadUser(id, headers) {
         return userResource.getUserById(id, headers)
             .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
+            .then(loadLanguagesForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
             .then(loadOfficeForUser(headers))
@@ -58,6 +61,7 @@ function loadCurrentUser(headers) {
         return userResource.getCurrentUser(headers)
             .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
+            .then(loadLanguagesForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
             .then(loadOfficeForUser(headers))
@@ -85,6 +89,27 @@ function loadSkillsForUser(headers) {
 function matchSkillsAndConnectors(skills, connectors) {
     return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years'])
         .then(utils.matchListAndObjectIds(skills));
+}
+
+// LANGUAGES
+// ============================================================================
+
+function loadLanguagesForUser(headers) {
+    return function(user) {
+        var connectors = userToLanguageResource.getUserToLanguageConnectorsByUserId(user._id, headers);
+        var languages = languageResource.getAllLanguages(headers);
+        return Promise.all([connectors, languages])
+            .then(function() {
+                return matchLanguagesAndConnectors(languages.value(), connectors.value());
+            })
+            .then(utils.sortListByProperty('name'))
+            .then(utils.setFieldForObject(user, 'languages'));
+    };
+}
+
+function matchLanguagesAndConnectors(languages, connectors) {
+    return utils.extractPropertiesFromConnectors('languageId', connectors, ['level'])
+        .then(utils.matchListAndObjectIds(languages));
 }
 
 // ROLE
