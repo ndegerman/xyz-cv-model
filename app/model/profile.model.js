@@ -5,6 +5,7 @@ var userResource = require('../resource/user.resource');
 var roleResource = require('../resource/role.resource');
 var skillResource = require('../resource/skill.resource');
 var languageResource = require('../resource/language.resource');
+var otherResource = require('../resource/other.resource');
 var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
 var certificateResource = require('../resource/certificate.resource');
@@ -17,6 +18,7 @@ var attributeResource = require('../resource/attribute.resource');
 var roleToAttributeResource = require('../resource/roleToAttributeConnector.resource');
 var userToSkillResource = require('../resource/userToSkillConnector.resource');
 var userToLanguageResource = require('../resource/userToLanguageConnector.resource');
+var userToOtherResource = require('../resource/userToOtherConnector.resource');
 var utils = require('../utils/utils');
 
 var Promise = require('bluebird');
@@ -51,6 +53,7 @@ function loadUser(id, headers) {
             .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
             .then(loadLanguagesForUser(headers))
+            .then(loadOthersForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
             .then(loadCertificatesForUser(headers))
@@ -65,6 +68,7 @@ function loadCurrentUser(headers) {
             .then(loadProfileImageForUser(headers))
             .then(loadSkillsForUser(headers))
             .then(loadLanguagesForUser(headers))
+            .then(loadOthersForUser(headers))
             .then(loadRoleForUser(headers))
             .then(loadAssignmentsForUser(headers))
             .then(loadCertificatesForUser(headers))
@@ -114,6 +118,28 @@ function loadLanguagesForUser(headers) {
 function matchLanguagesAndConnectors(languages, connectors) {
     return utils.extractPropertiesFromConnectors('languageId', connectors, ['level'])
         .then(utils.matchListAndObjectIds(languages));
+}
+
+// OTHER
+// ============================================================================
+
+function loadOthersForUser(headers) {
+    return function(user) {
+        var connectors = userToOtherResource.getUserToOtherConnectorsByUserId(user._id, headers);
+        var others = otherResource.getAllOthers(headers);
+        return Promise.all([connectors, others])
+            .then(function() {
+                return matchOthersAndConnectors(others.value(), connectors.value());
+            })
+            .then(utils.sortListByProperty('year'))
+            .then(utils.reverseList)
+            .then(utils.setFieldForObject(user, 'others'));
+    };
+}
+
+function matchOthersAndConnectors(others, connectors) {
+    return utils.extractPropertiesFromConnectors('otherId', connectors, ['year'])
+        .then(utils.matchListAndObjectIds(others));
 }
 
 // ROLE
