@@ -87,7 +87,7 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level','futureLevel' 'years', 'updatedAt'])
+    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years', 'updatedAt'])
         .then(utils.matchListAndObjectIds(skills));
 }
 
@@ -199,10 +199,8 @@ function loadDomainForCertificates(headers, domains) {
     };
 }
 
-
 // Certificates
 // ============================================================================
-
 
 function loadCertificatesForUser(headers) {
     return function(user) {
@@ -217,7 +215,6 @@ function loadCertificatesForUser(headers) {
     };
 }
 
-
 function matchCertificatesAndConnectors(certificates, connectors) {
     return utils.extractPropertiesFromConnectors('certificateId', connectors, ['skills', 'dateFrom', 'dateTo', 'description', 'updatedAt'])
         .then(utils.matchListAndObjectIds(certificates));
@@ -230,7 +227,7 @@ function loadCertificateSubEntities(headers) {
             var customers = customerResource.getAllCustomers(headers);
             var domains = domainResource.getAllDomains(headers);
             return Promise.all([skills, customers, domains])
-                .then(function(){
+                .then(function() {
                     skills = skills.value();
                     customers = customers.value();
                     domains = domains.value();
@@ -261,8 +258,6 @@ function loadCustomerForCertificates(headers, customers) {
         });
     };
 }
-
-
 
 // PROFILE IMAGE
 // ============================================================================
