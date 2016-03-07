@@ -99,11 +99,7 @@ function loadSkillsForUser(headers) {
 }
 
 function matchSkillsAndConnectors(skills, connectors) {
-<<<<<<< bf4d5d9739b4c3bc004775483183f7742dacadbe
     return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years', 'updatedAt', 'expertise', 'experience'])
-=======
-    return utils.extractPropertiesFromConnectors('skillId', connectors, ['level', 'futureLevel', 'years', 'expertise', 'experience'])
->>>>>>> Added experience and placeholders for skills, assignments and summary
         .then(utils.matchListAndObjectIds(skills));
 }
 
