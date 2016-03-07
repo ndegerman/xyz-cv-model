@@ -9,6 +9,7 @@ var otherResource = require('../resource/other.resource');
 var fileResource = require('../resource/file.resource');
 var assignmentResource = require('../resource/assignment.resource');
 var certificateResource = require('../resource/certificate.resource');
+var courseResource = require('../resource/course.resource');
 var domainResource = require('../resource/domain.resource');
 var customerResource = require('../resource/customer.resource');
 var userToAssignmentResource = require('../resource/userToAssignmentConnector.resource');
@@ -19,6 +20,7 @@ var roleToAttributeResource = require('../resource/roleToAttributeConnector.reso
 var userToSkillResource = require('../resource/userToSkillConnector.resource');
 var userToLanguageResource = require('../resource/userToLanguageConnector.resource');
 var userToOtherResource = require('../resource/userToOtherConnector.resource');
+var userToCourseResource = require('../resource/userToCourseConnector.resource');
 var utils = require('../utils/utils');
 
 var Promise = require('bluebird');
@@ -58,6 +60,7 @@ function loadUser(id, headers) {
             .then(loadAssignmentsForUser(headers))
             .then(loadCertificatesForUser(headers))
             .then(loadOfficeForUser(headers))
+            .then(loadCoursesForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
 }
@@ -73,6 +76,7 @@ function loadCurrentUser(headers) {
             .then(loadAssignmentsForUser(headers))
             .then(loadCertificatesForUser(headers))
             .then(loadOfficeForUser(headers))
+            .then(loadCoursesForUser(headers))
             .then(utils.setFieldForObject(model, 'user'));
     };
 }
@@ -308,6 +312,28 @@ function loadCustomerForCertificates(headers, customers) {
                 .then(utils.setFieldForObject(certificate, 'customer'));
         });
     };
+}
+
+// COURSES
+// ============================================================================
+
+function loadCoursesForUser(headers) {
+    return function(user) {
+        var connectors = userToCourseResource.getUserToCourseConnectorsByUserId(user._id, headers);
+        var courses = courseResource.getAllCourses(headers);
+        return Promise.all([connectors, courses])
+            .then(function() {
+                return matchCoursesAndConnectors(courses.value(), connectors.value());
+            })
+            .then(utils.sortListByProperty('dateTo'))
+            .then(utils.reverseList)
+            .then(utils.setFieldForObject(user, 'courses'));
+    };
+}
+
+function matchCoursesAndConnectors(courses, connectors) {
+    return utils.extractPropertiesFromConnectors('courseId', connectors, ['dateTo', 'dateFrom'])
+        .then(utils.matchListAndObjectIds(courses));
 }
 
 // PROFILE IMAGE
